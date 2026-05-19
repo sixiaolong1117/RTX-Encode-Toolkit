@@ -82,13 +82,15 @@
                                 <Button Grid.Row="1" Grid.Column="2" Content="..." Click="BrowseOutput_Click"/>
                             </Grid>
 
-                            <Grid ColumnDefinitions="96,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                            <Grid ColumnDefinitions="96,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="8">
                                 <TextBlock Text="NVEncC" Classes="label"/>
                                 <TextBox Grid.Column="1" Text="{Binding NvencPath}"/>
+                                <Button Grid.Column="2" Content="下载/更新" Command="{Binding InstallOrUpdateNvencCommand}"/>
                                 <TextBlock Grid.Row="1" Text="ffprobe" Classes="label"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FfprobePath}"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding FfprobePath}"/>
                                 <TextBlock Grid.Row="2" Text="ffmpeg" Classes="label"/>
-                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding FfmpegPath}"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding FfmpegPath}"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding NvencToolStatus}" Opacity="0.72" TextWrapping="Wrap"/>
                             </Grid>
                         </StackPanel>
                     </Border>
@@ -209,17 +211,29 @@
                     </StackPanel>
                 </Border>
 
-                <ProgressBar Grid.Row="1" IsIndeterminate="{Binding IsEncoding}" Height="4"/>
+                <ProgressBar Grid.Row="1" IsIndeterminate="{Binding IsBusy}" Height="4"/>
 
                 <Border Grid.Row="2" Classes="panel">
                     <Grid RowDefinitions="Auto,*">
-                        <TextBlock Text="日志" Classes="sectionTitle"/>
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                            <TextBox Classes="mono"
+                        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                            <TextBlock Text="日志" Classes="sectionTitle" Margin="0"/>
+                            <CheckBox x:Name="FollowLogCheckBox"
+                                      Grid.Column="1"
+                                      Content="跟随最新日志"
+                                      IsChecked="True"
+                                      VerticalAlignment="Center"/>
+                        </Grid>
+                        <ScrollViewer x:Name="LogScrollViewer"
+                                      Grid.Row="1"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Auto">
+                            <TextBox x:Name="LogTextBox"
+                                     Classes="mono"
                                      Text="{Binding LogText}"
                                      IsReadOnly="True"
                                      AcceptsReturn="True"
-                                     TextWrapping="Wrap"/>
+                                     TextWrapping="Wrap"
+                                     TextChanged="LogTextBox_TextChanged"/>
                         </ScrollViewer>
                     </Grid>
                 </Border>

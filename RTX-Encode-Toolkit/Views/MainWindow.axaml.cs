@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using RTX_Encode_Toolkit.ViewModels;
 
 namespace RTX_Encode_Toolkit.Views;
@@ -48,5 +49,21 @@ public partial class MainWindow : Window
         {
             viewModel.SetOutputDirectory(folders[0].Path.LocalPath);
         }
+    }
+
+    private void LogTextBox_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (FollowLogCheckBox.IsChecked != true)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                LogScrollViewer.Offset = LogScrollViewer.Offset.WithY(LogScrollViewer.Extent.Height);
+                LogTextBox.CaretIndex = LogTextBox.Text?.Length ?? 0;
+            },
+            DispatcherPriority.Background);
     }
 }

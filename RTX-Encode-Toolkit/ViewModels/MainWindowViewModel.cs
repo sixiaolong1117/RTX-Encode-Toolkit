@@ -16,6 +16,7 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly ProcessRunner _processRunner = new();
     private readonly NvencCommandBuilder _commandBuilder;
+    private readonly NvencToolManager _nvencToolManager = new();
     private CancellationTokenSource? _encodeCancellation;
 
     [ObservableProperty]
@@ -123,6 +124,12 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isEncoding;
 
+    [ObservableProperty]
+    private bool _isToolInstalling;
+
+    [ObservableProperty]
+    private string _nvencToolStatus = "NVEnc：使用 PATH 或手动路径";
+
     public IReadOnlyList<string> NvencPresets { get; } = ["P7", "P6", "P5", "P4", "P3", "P2", "P1"];
 
     public IReadOnlyList<string> AvsyncModes { get; } = ["auto", "forcecfr", "vfr"];
@@ -131,6 +138,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public IReadOnlyList<string> NormalizePresets { get; } =
         ["ultrafast", "superfast", "veryfast", "faster", "fast", "medium"];
+
+    public bool IsBusy => IsEncoding || IsToolInstalling;
 
     public string CommandPreview
     {
@@ -153,17 +162,24 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var videoProbeService = new VideoProbeService(_processRunner);
         _commandBuilder = new NvencCommandBuilder(videoProbeService);
+        UseExistingManagedNvenc();
 
         PropertyChanged += (_, args) =>
         {
-            if (args.PropertyName is nameof(CommandPreview) or nameof(LogText))
+            if (args.PropertyName is nameof(CommandPreview) or nameof(LogText) or nameof(IsBusy))
             {
                 return;
             }
 
             OnPropertyChanged(nameof(CommandPreview));
+            if (args.PropertyName is nameof(IsEncoding) or nameof(IsToolInstalling))
+            {
+                OnPropertyChanged(nameof(IsBusy));
+            }
+
             StartEncodeCommand.NotifyCanExecuteChanged();
             CancelEncodeCommand.NotifyCanExecuteChanged();
+            InstallOrUpdateNvencCommand.NotifyCanExecuteChanged();
         };
     }
 
@@ -252,7 +268,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private bool CanStartEncode()
     {
-        return !IsEncoding && !string.IsNullOrWhiteSpace(InputPath);
+        return !IsEncoding && !IsToolInstalling && !string.IsNullOrWhiteSpace(InputPath);
     }
 
     [RelayCommand(CanExecute = nameof(CanCancelEncode))]
@@ -271,6 +287,38 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         LogText = string.Empty;
         StatusText = "日志已清空";
+    }
+
+    [RelayCommand(CanExecute = nameof(CanInstallOrUpdateNvenc))]
+    private async Task InstallOrUpdateNvencAsync()
+    {
+        IsToolInstalling = true;
+        StatusText = "正在安装 NVEnc";
+        var progress = new Progress<string>(message => AppendStatus("[NVEnc] " + message));
+
+        try
+        {
+            AppendStatus("开始下载/更新 NVEncC x64...");
+            var result = await _nvencToolManager.InstallOrUpdateAsync(progress, CancellationToken.None);
+            NvencPath = result.ExecutablePath;
+            NvencToolStatus = $"NVEnc：{result.VersionTag} ({result.InstallDirectory})";
+            StatusText = "NVEnc 安装完成";
+            AppendStatus("NVEncC 路径已更新：" + result.ExecutablePath);
+        }
+        catch (Exception ex)
+        {
+            StatusText = "NVEnc 安装失败";
+            AppendStatus("NVEnc 安装失败：" + ex.Message);
+        }
+        finally
+        {
+            IsToolInstalling = false;
+        }
+    }
+
+    private bool CanInstallOrUpdateNvenc()
+    {
+        return !IsEncoding && !IsToolInstalling;
     }
 
     private EncodeSettings CreateSettings()
@@ -309,6 +357,19 @@ public partial class MainWindowViewModel : ViewModelBase
             TemporalAq = TemporalAq,
             Avsync = Avsync
         };
+    }
+
+    private void UseExistingManagedNvenc()
+    {
+        var existingNvenc = _nvencToolManager.FindExistingNvenc();
+        if (existingNvenc is null)
+        {
+            NvencToolStatus = "NVEnc：未发现内置版本，可点击下载/更新";
+            return;
+        }
+
+        NvencPath = existingNvenc;
+        NvencToolStatus = "NVEnc：已发现 " + existingNvenc;
     }
 
     private async Task EnsureNvencCapabilitiesAsync(EncodeSettings settings, CancellationToken cancellationToken)
