@@ -1,0 +1,231 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RTX_Encode_Toolkit.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DesignWidth="1180"
+        d:DesignHeight="760"
+        Width="1180"
+        Height="760"
+        MinWidth="980"
+        MinHeight="680"
+        x:Class="RTX_Encode_Toolkit.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="RTX Encode Toolkit">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="Border.panel">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+        </Style>
+        <Style Selector="TextBlock.sectionTitle">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+        <Style Selector="TextBox.mono">
+            <Setter Property="FontFamily" Value="Consolas, Cascadia Mono"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="NumericUpDown">
+            <Setter Property="Height" Value="32"/>
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="MinHeight" Value="32"/>
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="MinHeight" Value="32"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*" Margin="18" RowSpacing="14">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14">
+            <StackPanel>
+                <TextBlock Text="RTX Encode Toolkit" FontSize="24" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding StatusText}" Opacity="0.72" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Button Content="清空日志" Command="{Binding ClearLogCommand}"/>
+                <Button Content="取消" Command="{Binding CancelEncodeCommand}"/>
+                <Button Content="开始编码" Command="{Binding StartEncodeCommand}" Classes="accent"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnDefinitions="430,*" ColumnSpacing="14">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="12">
+                    <Border Classes="panel">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="文件" Classes="sectionTitle"/>
+
+                            <Grid ColumnDefinitions="96,*,42" RowDefinitions="Auto,Auto" RowSpacing="8">
+                                <TextBlock Text="输入视频" Classes="label"/>
+                                <TextBox Grid.Column="1" Text="{Binding InputPath}" PlaceholderText="input.mp4"/>
+                                <Button Grid.Column="2" Content="..." Click="BrowseInput_Click"/>
+
+                                <TextBlock Grid.Row="1" Text="输出目录" Classes="label"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding OutputDirectory}" PlaceholderText="留空则输出到 rtx_exports"/>
+                                <Button Grid.Row="1" Grid.Column="2" Content="..." Click="BrowseOutput_Click"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="96,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                                <TextBlock Text="NVEncC" Classes="label"/>
+                                <TextBox Grid.Column="1" Text="{Binding NvencPath}"/>
+                                <TextBlock Grid.Row="1" Text="ffprobe" Classes="label"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FfprobePath}"/>
+                                <TextBlock Grid.Row="2" Text="ffmpeg" Classes="label"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding FfmpegPath}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="panel">
+                        <StackPanel Spacing="10">
+                            <CheckBox Content="RTX VSR 超分" IsChecked="{Binding EnableVsr}" FontWeight="SemiBold"/>
+
+                            <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
+                                <TextBlock Text="自动长边" Classes="label"/>
+                                <CheckBox Grid.Column="1" IsChecked="{Binding AutoVsrResolution}"/>
+
+                                <TextBlock Grid.Row="1" Text="长边像素" Classes="label"/>
+                                <NumericUpDown Grid.Row="1" Grid.Column="1" Minimum="2" Maximum="8192" Increment="2" Value="{Binding VsrLongEdge}"/>
+
+                                <TextBlock Grid.Row="2" Text="固定分辨率" Classes="label"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding VsrResolution}"/>
+
+                                <TextBlock Grid.Row="3" Text="VSR 质量" Classes="label"/>
+                                <NumericUpDown Grid.Row="3" Grid.Column="1" Minimum="1" Maximum="4" Increment="1" Value="{Binding VsrQuality}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="panel">
+                        <StackPanel Spacing="10">
+                            <CheckBox Content="RTX HDR / NGX TrueHDR" IsChecked="{Binding EnableHdr}" FontWeight="SemiBold"/>
+
+                            <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8">
+                                <TextBlock Text="Contrast" Classes="label"/>
+                                <NumericUpDown Grid.Column="1" Minimum="0" Maximum="200" Increment="1" Value="{Binding HdrContrast}"/>
+
+                                <TextBlock Grid.Row="1" Text="Saturation" Classes="label"/>
+                                <NumericUpDown Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="200" Increment="1" Value="{Binding HdrSaturation}"/>
+
+                                <TextBlock Grid.Row="2" Text="Middle Gray" Classes="label"/>
+                                <NumericUpDown Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100" Increment="1" Value="{Binding HdrMiddleGray}"/>
+
+                                <TextBlock Grid.Row="3" Text="Max Luminance" Classes="label"/>
+                                <NumericUpDown Grid.Row="3" Grid.Column="1" Minimum="100" Maximum="4000" Increment="50" Value="{Binding HdrMaxLuminance}"/>
+
+                                <TextBlock Grid.Row="4" Text="MaxCLL" Classes="label"/>
+                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding HdrMaxCll}"/>
+
+                                <TextBlock Grid.Row="5" Text="Master Display" Classes="label"/>
+                                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding HdrMasterDisplay}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="panel">
+                        <StackPanel Spacing="10">
+                            <CheckBox Content="NVOF FRUC 插帧" IsChecked="{Binding EnableFrameInterpolation}" FontWeight="SemiBold"/>
+
+                            <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8">
+                                <TextBlock Text="目标帧率" Classes="label"/>
+                                <NumericUpDown Grid.Column="1" Minimum="1" Maximum="240" Increment="1" Value="{Binding TargetFps}"/>
+
+                                <TextBlock Grid.Row="1" Text="高帧率跳过" Classes="label"/>
+                                <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding SkipFrucWhenSourceFpsIsHigh}"/>
+
+                                <TextBlock Grid.Row="2" Text="CFR 预处理" Classes="label"/>
+                                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding NormalizeModes}" SelectedItem="{Binding FrucNormalizeMode}"/>
+
+                                <TextBlock Grid.Row="3" Text="CFR 帧率" Classes="label"/>
+                                <NumericUpDown Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="240" Increment="0.001" Value="{Binding FrucNormalizeFps}"/>
+
+                                <TextBlock Grid.Row="4" Text="预处理 CRF" Classes="label"/>
+                                <NumericUpDown Grid.Row="4" Grid.Column="1" Minimum="0" Maximum="51" Increment="1" Value="{Binding FrucNormalizeCrf}"/>
+
+                                <TextBlock Grid.Row="5" Text="预处理预设" Classes="label"/>
+                                <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding NormalizePresets}" SelectedItem="{Binding FrucNormalizePreset}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="panel">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="编码" Classes="sectionTitle"/>
+
+                            <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8">
+                                <TextBlock Text="QVBR" Classes="label"/>
+                                <NumericUpDown Grid.Column="1" Minimum="1" Maximum="51" Increment="1" Value="{Binding Qvbr}"/>
+
+                                <TextBlock Grid.Row="1" Text="Preset" Classes="label"/>
+                                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding NvencPresets}" SelectedItem="{Binding NvencPreset}"/>
+
+                                <TextBlock Grid.Row="2" Text="B Frames" Classes="label"/>
+                                <NumericUpDown Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="8" Increment="1" Value="{Binding BFrames}"/>
+
+                                <TextBlock Grid.Row="3" Text="Temporal AQ" Classes="label"/>
+                                <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding TemporalAq}"/>
+
+                                <TextBlock Grid.Row="4" Text="反交错" Classes="label"/>
+                                <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding Deinterlace}"/>
+
+                                <TextBlock Grid.Row="5" Text="AVSync" Classes="label"/>
+                                <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding AvsyncModes}" SelectedItem="{Binding Avsync}"/>
+                            </Grid>
+
+                            <CheckBox Content="保留 CFR 预处理临时文件" IsChecked="{Binding KeepTemporaryFiles}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10">
+                <Border Classes="panel">
+                    <StackPanel>
+                        <TextBlock Text="命令预览" Classes="sectionTitle"/>
+                        <TextBox Classes="mono"
+                                 Text="{Binding CommandPreview}"
+                                 IsReadOnly="True"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 MinHeight="150"
+                                 MaxHeight="230"/>
+                    </StackPanel>
+                </Border>
+
+                <ProgressBar Grid.Row="1" IsIndeterminate="{Binding IsEncoding}" Height="4"/>
+
+                <Border Grid.Row="2" Classes="panel">
+                    <Grid RowDefinitions="Auto,*">
+                        <TextBlock Text="日志" Classes="sectionTitle"/>
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <TextBox Classes="mono"
+                                     Text="{Binding LogText}"
+                                     IsReadOnly="True"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"/>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <TextBlock Grid.Row="3" Text="{Binding LastOutputPath}" Opacity="0.72" TextWrapping="Wrap"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
