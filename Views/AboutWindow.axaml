@@ -1,68 +1,92 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:services="using:RTX_Encode_Toolkit.Services"
-        Width="360"
-        Height="360"
+        Width="380"
+        Height="400"
         MinWidth="320"
-        MinHeight="320"
+        MinHeight="360"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
         x:Class="RTX_Encode_Toolkit.Views.AboutWindow"
         Icon="/Assets/rtx-encode-toolkit.ico"
-        Title="{services:Localization Key=AboutTitle}">
+        Title="{services:Localization Key=AboutTitle}"
+        Background="Transparent"
+        TransparencyLevelHint="Mica,Blur">
 
     <Window.Styles>
-        <Style Selector="TextBlock.authorName">
-            <Setter Property="FontSize" Value="22"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Style Selector="Window">
+            <Setter Property="Background" Value="Transparent" />
         </Style>
         <Style Selector="Button.repoLink">
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="4"/>
-            <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
     </Window.Styles>
 
-    <Grid Margin="24">
+    <Grid Margin="0">
+
+        <!-- ========== WinUI 3 风格标题栏 ========== -->
+        <Border Classes="titleBar" Padding="16,0" Height="44" VerticalAlignment="Top">
+            <TextBlock Text="{services:Localization Key=AboutTitle}"
+                       FontSize="15"
+                       FontWeight="SemiBold"
+                       VerticalAlignment="Center" />
+        </Border>
+
+        <!-- ========== 内容区域 ========== -->
         <StackPanel HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Spacing="18">
-            <Border Width="128"
-                    Height="128"
-                    CornerRadius="64"
+                    Spacing="16"
+                    Margin="32">
+
+            <!-- 头像 -->
+            <Border Width="100"
+                    Height="100"
+                    CornerRadius="50"
                     ClipToBounds="True"
                     BorderBrush="{DynamicResource SystemAccentColor}"
-                    BorderThickness="2">
+                    BorderThickness="2"
+                    HorizontalAlignment="Center">
                 <Image x:Name="AvatarImage"
-                       Width="128"
-                       Height="128"
-                       Stretch="UniformToFill"/>
+                       Width="100"
+                       Height="100"
+                       Stretch="UniformToFill" />
             </Border>
 
-            <TextBlock Text="司晓龙" Classes="authorName"/>
+            <!-- 作者名称 -->
+            <TextBlock Text="司晓龙"
+                       FontSize="20"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center" />
 
+            <!-- 版本号 -->
             <TextBlock x:Name="VersionText"
-                       FontSize="14"
-                       Foreground="{DynamicResource SystemAccentColor}"
-                       HorizontalAlignment="Center"/>
+                       Classes="accent"
+                       HorizontalAlignment="Center" />
 
+            <Separator Margin="0,4" />
+
+            <!-- 仓库链接 -->
             <Button Classes="repoLink"
                     Click="OpenRepository_Click">
                 <TextBlock TextDecorations="Underline"
-                           Text="Repo"
-                           TextWrapping="Wrap"/>
+                           Text="GitHub Repository"
+                           TextWrapping="Wrap" />
             </Button>
 
+            <!-- 许可证链接 -->
             <Button Classes="repoLink"
                     Click="OpenLicense_Click">
                 <TextBlock TextDecorations="Underline"
                            Text="License"
-                           TextWrapping="Wrap"/>
+                           TextWrapping="Wrap" />
             </Button>
+
         </StackPanel>
     </Grid>
 </Window>
