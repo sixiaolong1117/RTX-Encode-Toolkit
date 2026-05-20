@@ -45,6 +45,11 @@
 
             <TextBlock Text="司晓龙" Classes="authorName"/>
 
+            <TextBlock x:Name="VersionText"
+                       FontSize="14"
+                       Foreground="{DynamicResource SystemAccentColor}"
+                       HorizontalAlignment="Center"/>
+
             <Button Classes="repoLink"
                     Click="OpenRepository_Click">
                 <TextBlock TextDecorations="Underline"

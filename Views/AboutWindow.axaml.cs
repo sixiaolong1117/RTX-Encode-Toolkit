@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
@@ -20,6 +21,13 @@ public partial class AboutWindow : Window
     {
         InitializeComponent();
         LoadAvatarAsync();
+        LoadVersion();
+    }
+
+    private void LoadVersion()
+    {
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        VersionText.Text = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}.{version.Revision}" : "v1.0.0.0";
     }
 
     private static HttpClient CreateHttpClient()

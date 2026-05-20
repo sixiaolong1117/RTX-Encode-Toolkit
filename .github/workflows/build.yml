@@ -24,11 +24,52 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # 需要完整历史记录以切换分支
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # 推送 tag 时自动更新版本号并提交到默认分支
+      - name: Update version from tag and commit
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          # 从 tag 名提取版本号（去掉 v 前缀，并补上 .0 后缀）
+          $tag = "${{ github.ref_name }}"
+          $version = $tag -replace '^v', ''
+          # 项目版本号格式为 x.x.x.0，tag 只传 x.x.x，所以补上 .0
+          if ($version -match '^\d+\.\d+\.\d+$') {
+            $version = "$version.0"
+          }
+          Write-Host "Tag: $tag -> Version: $version"
+
+          # 配置 git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 切换到默认分支（master），提交版本变更
+          $defaultBranch = "${{ github.event.repository.default_branch }}"
+          git fetch origin $defaultBranch
+          git checkout $defaultBranch
+          git pull origin $defaultBranch
+
+          # 更新版本号
+          (Get-Content "$env:PROJECT_PATH") -replace '<Version>[^<]*</Version>', "<Version>$version</Version>" | Set-Content "$env:PROJECT_PATH" -Encoding UTF8
+
+          git add "$env:PROJECT_PATH"
+          git commit -m "Bump version to $version [skip ci]"
+          git push origin $defaultBranch
+          Write-Host "Committed version $version to $defaultBranch branch"
+
+          # 切回 tag 的 commit 进行构建（detached HEAD）
+          git checkout $tag
+
+          # 重新应用版本号到工作目录（因为切换分支会重置文件）
+          (Get-Content "$env:PROJECT_PATH") -replace '<Version>[^<]*</Version>', "<Version>$version</Version>" | Set-Content "$env:PROJECT_PATH" -Encoding UTF8
+          Write-Host "Applied version $version for current build"
 
       - name: Restore
         run: dotnet restore $env:PROJECT_PATH
