@@ -1,0 +1,56 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:services="using:RTX_Encode_Toolkit.Services"
+        Width="360"
+        Height="360"
+        MinWidth="320"
+        MinHeight="320"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        x:Class="RTX_Encode_Toolkit.Views.AboutWindow"
+        Icon="/Assets/rtx-encode-toolkit.ico"
+        Title="{services:Localization Key=AboutTitle}">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.authorName">
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.repoLink">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid Margin="24">
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="18">
+            <Border Width="128"
+                    Height="128"
+                    CornerRadius="64"
+                    ClipToBounds="True"
+                    BorderBrush="{DynamicResource SystemAccentColor}"
+                    BorderThickness="2">
+                <Image x:Name="AvatarImage"
+                       Width="128"
+                       Height="128"
+                       Stretch="UniformToFill"/>
+            </Border>
+
+            <TextBlock Text="司晓龙" Classes="authorName"/>
+
+            <Button Classes="repoLink"
+                    Click="OpenRepository_Click">
+                <TextBlock TextDecorations="Underline"
+                           Text="Repo"
+                           TextWrapping="Wrap"/>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

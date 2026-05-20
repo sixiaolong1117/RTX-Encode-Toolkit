@@ -129,6 +129,8 @@ public sealed class Localization : INotifyPropertyChanged
 
             // Settings
             ["Settings"] = "设置",
+            ["About"] = "关于",
+            ["AboutTitle"] = "关于",
             ["SettingsTitle"] = "设置",
             ["ToolPaths"] = "工具路径",
             ["NvencPath"] = "NVEncC 路径",
@@ -255,6 +257,8 @@ public sealed class Localization : INotifyPropertyChanged
 
             // Settings
             ["Settings"] = "Settings",
+            ["About"] = "About",
+            ["AboutTitle"] = "About",
             ["SettingsTitle"] = "Settings",
             ["ToolPaths"] = "Tool Paths",
             ["NvencPath"] = "NVEncC Path",

@@ -362,6 +362,13 @@ public partial class MainWindowViewModel : ViewModelBase
         settingsWindow.Show();
     }
 
+    [RelayCommand]
+    private void OpenAbout()
+    {
+        var aboutWindow = new Views.AboutWindow();
+        aboutWindow.Show();
+    }
+
     private EncodeSettings CreateSettings()
 
     {

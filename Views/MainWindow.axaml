@@ -13,7 +13,7 @@
         MinHeight="680"
         x:Class="RTX_Encode_Toolkit.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/rtx-encode-toolkit.ico"
         Title="{services:Localization Key=WindowTitle}">
 
     <Design.DataContext>
@@ -61,6 +61,7 @@
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                 <Button Content="{services:Localization Key=Settings}" Command="{Binding OpenSettingsCommand}"/>
+                <Button Content="{services:Localization Key=About}" Command="{Binding OpenAboutCommand}"/>
                 <Button Content="{services:Localization Key=ClearLog}" Command="{Binding ClearLogCommand}"/>
                 <Button Content="{services:Localization Key=Cancel}" Command="{Binding CancelEncodeCommand}"/>
                 <Button Content="{services:Localization Key=StartEncode}" Command="{Binding StartEncodeCommand}" Classes="accent"/>
