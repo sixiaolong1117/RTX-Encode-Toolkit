@@ -19,6 +19,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly NvencToolManager _nvencToolManager = new();
     private CancellationTokenSource? _encodeCancellation;
 
+    private readonly Localization _localization = Localization.Instance;
+
     [ObservableProperty]
     private string _nvencPath = "NVEncC64.exe";
 
@@ -113,7 +115,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _avsync = "auto";
 
     [ObservableProperty]
-    private string _statusText = "准备就绪";
+    private string _statusText = string.Empty;
 
     [ObservableProperty]
     private string _logText = string.Empty;
@@ -128,9 +130,10 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _isToolInstalling;
 
     [ObservableProperty]
-    private string _nvencToolStatus = "NVEnc：使用 PATH 或手动路径";
+    private string _nvencToolStatus = string.Empty;
 
     public IReadOnlyList<string> NvencPresets { get; } = ["P7", "P6", "P5", "P4", "P3", "P2", "P1"];
+
 
     public IReadOnlyList<string> AvsyncModes { get; } = ["auto", "forcecfr", "vfr"];
 
@@ -149,7 +152,7 @@ public partial class MainWindowViewModel : ViewModelBase
             var builder = new StringBuilder();
             if (settings.EnableFrameInterpolation && settings.FrucNormalizeMode != "Off")
             {
-                builder.AppendLine("ffmpeg CFR prepass: Auto/Force 模式下可能先运行");
+                builder.AppendLine(_localization["FfmpegCfrPrepass"]);
                 builder.AppendLine();
             }
 
@@ -162,6 +165,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var videoProbeService = new VideoProbeService(_processRunner);
         _commandBuilder = new NvencCommandBuilder(videoProbeService);
+        UpdateStatusTexts();
         UseExistingManagedNvenc();
 
         PropertyChanged += (_, args) =>
@@ -183,6 +187,25 @@ public partial class MainWindowViewModel : ViewModelBase
         };
     }
 
+    internal void UpdateStatusTexts()
+
+    {
+        StatusText = _localization["StatusReady"];
+        NvencToolStatus = GetNvencToolStatusText();
+    }
+
+    private string GetNvencToolStatusText()
+    {
+        var existingNvenc = _nvencToolManager.FindExistingNvenc();
+        if (existingNvenc is null)
+        {
+            return _localization["NvencNotFound"];
+        }
+
+        return _localization["NvencFound"] + existingNvenc;
+    }
+
+
     public void SetInputPath(string path)
     {
         InputPath = path;
@@ -201,14 +224,14 @@ public partial class MainWindowViewModel : ViewModelBase
         _encodeCancellation = new CancellationTokenSource();
         IsEncoding = true;
         LogText = string.Empty;
-        StatusText = "准备编码";
+        StatusText = _localization["StatusEncoding"];
 
         var progress = new Progress<string>(AppendProcessLine);
 
         try
         {
             settings = CreateSettings();
-            AppendStatus("解析视频信息并生成命令...");
+            AppendStatus(_localization["ParsingVideoInfo"]);
             plan = await _commandBuilder.BuildAsync(settings, _encodeCancellation.Token);
             LastOutputPath = plan.OutputPath;
 
@@ -227,36 +250,37 @@ public partial class MainWindowViewModel : ViewModelBase
 
             if (plan.PreprocessCommand is not null)
             {
-                AppendStatus("运行 ffmpeg CFR 预处理...");
+                AppendStatus(_localization["RunningFfmpegPreprocess"]);
                 AppendCommand(plan.PreprocessCommand);
                 var prepassExitCode = await _processRunner.RunAsync(plan.PreprocessCommand, progress, _encodeCancellation.Token);
                 if (prepassExitCode != 0)
                 {
-                    throw new InvalidOperationException($"ffmpeg 预处理失败，退出码 {prepassExitCode}。");
+                    throw new InvalidOperationException($"{_localization["FfmpegPreprocessFailed"]}{prepassExitCode}。");
                 }
             }
 
-            AppendStatus("运行 NVEncC 编码...");
+            AppendStatus(_localization["RunningNvencEncode"]);
             AppendCommand(plan.MainCommand);
             var exitCode = await _processRunner.RunAsync(plan.MainCommand, progress, _encodeCancellation.Token);
             if (exitCode != 0)
             {
-                throw new InvalidOperationException($"NVEncC 编码失败，退出码 {exitCode}。");
+                throw new InvalidOperationException($"{_localization["NvencEncodeFailed"]}{exitCode}。");
             }
 
-            StatusText = "编码完成";
-            AppendStatus("完成：" + plan.OutputPath);
+            StatusText = _localization["StatusCompleted"];
+            AppendStatus(_localization["CompletedOutput"] + plan.OutputPath);
         }
         catch (OperationCanceledException)
         {
-            StatusText = "已取消";
-            AppendStatus("任务已取消。");
+            StatusText = _localization["StatusCancelled"];
+            AppendStatus(_localization["TaskCancelled"]);
         }
         catch (Exception ex)
         {
-            StatusText = "失败";
+            StatusText = _localization["StatusFailed"];
             AppendStatus(ex.Message);
         }
+
         finally
         {
             TryDeleteTemporaryInput(plan, settings);
@@ -286,30 +310,31 @@ public partial class MainWindowViewModel : ViewModelBase
     private void ClearLog()
     {
         LogText = string.Empty;
-        StatusText = "日志已清空";
+        StatusText = _localization["StatusLogCleared"];
     }
 
     [RelayCommand(CanExecute = nameof(CanInstallOrUpdateNvenc))]
     private async Task InstallOrUpdateNvencAsync()
     {
         IsToolInstalling = true;
-        StatusText = "正在安装 NVEnc";
+        StatusText = _localization["StatusInstallingNvenc"];
         var progress = new Progress<string>(message => AppendStatus("[NVEnc] " + message));
 
         try
         {
-            AppendStatus("开始下载/更新 NVEncC x64...");
+            AppendStatus(_localization["NvencDownloadStart"]);
             var result = await _nvencToolManager.InstallOrUpdateAsync(progress, CancellationToken.None);
             NvencPath = result.ExecutablePath;
             NvencToolStatus = $"NVEnc：{result.VersionTag} ({result.InstallDirectory})";
-            StatusText = "NVEnc 安装完成";
-            AppendStatus("NVEncC 路径已更新：" + result.ExecutablePath);
+            StatusText = _localization["StatusNvencInstalled"];
+            AppendStatus(_localization["NvencPathUpdated"] + result.ExecutablePath);
         }
         catch (Exception ex)
         {
-            StatusText = "NVEnc 安装失败";
-            AppendStatus("NVEnc 安装失败：" + ex.Message);
+            StatusText = _localization["StatusNvencInstallFailed"];
+            AppendStatus(_localization["StatusNvencInstallFailed"] + "：" + ex.Message);
         }
+
         finally
         {
             IsToolInstalling = false;
@@ -321,7 +346,18 @@ public partial class MainWindowViewModel : ViewModelBase
         return !IsEncoding && !IsToolInstalling;
     }
 
+    [RelayCommand]
+    private void OpenSettings()
+    {
+        var settingsWindow = new Views.SettingsWindow
+        {
+            DataContext = new SettingsViewModel(this)
+        };
+        settingsWindow.Show();
+    }
+
     private EncodeSettings CreateSettings()
+
     {
         return new EncodeSettings
         {
@@ -359,22 +395,23 @@ public partial class MainWindowViewModel : ViewModelBase
         };
     }
 
-    private void UseExistingManagedNvenc()
+    internal void UseExistingManagedNvenc()
+
     {
         var existingNvenc = _nvencToolManager.FindExistingNvenc();
         if (existingNvenc is null)
         {
-            NvencToolStatus = "NVEnc：未发现内置版本，可点击下载/更新";
+            NvencToolStatus = _localization["NvencNotFound"];
             return;
         }
 
         NvencPath = existingNvenc;
-        NvencToolStatus = "NVEnc：已发现 " + existingNvenc;
+        NvencToolStatus = _localization["NvencFound"] + existingNvenc;
     }
 
     private async Task EnsureNvencCapabilitiesAsync(EncodeSettings settings, CancellationToken cancellationToken)
     {
-        AppendStatus("检查 NVEncC 功能...");
+        AppendStatus(_localization["CheckingNvencCapabilities"]);
         var help = await _processRunner.CaptureAsync(
             new ProcessCommand(settings.NvencPath, ["--help"]),
             cancellationToken);
@@ -382,17 +419,17 @@ public partial class MainWindowViewModel : ViewModelBase
 
         if (settings.EnableVsr && !helpText.Contains("ngx-vsr", StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("当前 NVEncC64.exe 不包含 RTX VSR / ngx-vsr 支持。");
+            throw new InvalidOperationException(_localization["NvencNoVsr"]);
         }
 
         if (settings.EnableHdr && !helpText.Contains("--vpp-ngx-truehdr", StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("当前 NVEncC64.exe 不包含 RTX HDR / NGX TrueHDR 支持。");
+            throw new InvalidOperationException(_localization["NvencNoHdr"]);
         }
 
         if (settings.EnableFrameInterpolation && !helpText.Contains("--vpp-fruc", StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("当前 NVEncC64.exe 不包含 FRUC 插帧支持。");
+            throw new InvalidOperationException(_localization["NvencNoFruc"]);
         }
 
         if (!settings.EnableFrameInterpolation)
@@ -405,16 +442,17 @@ public partial class MainWindowViewModel : ViewModelBase
             cancellationToken);
         if (features.ExitCode != 0)
         {
-            AppendStatus("无法读取 --check-features，继续让 NVEncC 在编码时判断 FRUC 可用性。");
+            AppendStatus(_localization["NvencCheckFeaturesFailed"]);
             return;
         }
 
         var featureText = features.CombinedOutput;
         if (!Regex.IsMatch(featureText, "nvof.*fruc.*yes", RegexOptions.IgnoreCase | RegexOptions.Singleline))
         {
-            AppendStatus("未确认 NVOF FRUC=yes；如果 GPU 或驱动不支持，编码阶段会失败。");
+            AppendStatus(_localization["NvencFrucNotConfirmed"]);
         }
     }
+
 
     private void AppendCommand(ProcessCommand command)
     {

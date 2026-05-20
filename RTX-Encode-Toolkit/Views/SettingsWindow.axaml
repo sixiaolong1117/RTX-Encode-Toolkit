@@ -1,0 +1,130 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RTX_Encode_Toolkit.ViewModels"
+        xmlns:services="using:RTX_Encode_Toolkit.Services"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DesignWidth="520"
+        d:DesignHeight="400"
+        Width="520"
+        Height="400"
+        MinWidth="400"
+        MinHeight="350"
+        x:Class="RTX_Encode_Toolkit.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Title="{services:Localization Key=SettingsTitle}">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="TextBlock.sectionTitle">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="MinHeight" Value="32"/>
+        </Style>
+        <Style Selector="TextBlock.hint">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Opacity" Value="0.72"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="MinHeight" Value="32"/>
+        </Style>
+    </Window.Styles>
+
+
+
+    <Grid RowDefinitions="*,Auto" Margin="18" RowSpacing="14">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="16">
+                <!-- Tool Paths Section -->
+                <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="{services:Localization Key=ToolPaths}" Classes="sectionTitle"/>
+
+                        <Grid ColumnDefinitions="100,*,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="8">
+                            <TextBlock Text="NVEncC" Classes="label"/>
+                            <TextBox Grid.Column="1" Text="{Binding NvencPath}"/>
+                            <Button Grid.Column="2" Content="{services:Localization Key=Browse}" Click="BrowseNvenc_Click" MinWidth="32"/>
+                            <Button Grid.Column="3" Content="{services:Localization Key=DownloadUpdate}" Click="OpenNvencRelease_Click"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"
+                                       Text="{Binding NvencPathHint}"
+                                       Classes="hint"
+                                       Foreground="{Binding NvencPathHintColor}"/>
+
+                            <TextBlock Grid.Row="2" Text="ffprobe" Classes="label"/>
+                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding FfprobePath}"/>
+                            <Button Grid.Row="2" Grid.Column="2" Content="{services:Localization Key=Browse}" Click="BrowseFfprobe_Click" MinWidth="32"/>
+                            <Button Grid.Row="2" Grid.Column="3" Content="{services:Localization Key=DownloadUpdate}" Click="OpenFfmpegRelease_Click"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3"
+                                       Text="{Binding FfprobePathHint}"
+                                       Classes="hint"
+                                       Foreground="{Binding FfprobePathHintColor}"/>
+
+                            <TextBlock Grid.Row="4" Text="ffmpeg" Classes="label"/>
+                            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding FfmpegPath}"/>
+                            <Button Grid.Row="4" Grid.Column="2" Content="{services:Localization Key=Browse}" Click="BrowseFfmpeg_Click" MinWidth="32"/>
+                            <Button Grid.Row="4" Grid.Column="3" Content="{services:Localization Key=DownloadUpdate}" Click="OpenFfmpegRelease_Click"/>
+
+                            <TextBlock Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3"
+                                       Text="{Binding FfmpegPathHint}"
+                                       Classes="hint"
+                                       Foreground="{Binding FfmpegPathHintColor}"/>
+
+                        </Grid>
+
+
+
+
+
+
+
+
+                    </StackPanel>
+                </Border>
+
+                <!-- Language Section -->
+                <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="{services:Localization Key=LanguageSettings}" Classes="sectionTitle"/>
+
+                        <Grid ColumnDefinitions="100,*" RowSpacing="8">
+                            <TextBlock Text="{services:Localization Key=Language}" Classes="label"/>
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding LanguageOptions}"
+                                      SelectedItem="{Binding SelectedLanguage}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="{services:Localization Key=Close}" Click="Close_Click" MinWidth="80" MinHeight="32"/>
+            <Button Content="{services:Localization Key=Apply}" Command="{Binding ApplyCommand}" MinWidth="80" MinHeight="32"/>
+            <Button Content="{services:Localization Key=Save}" Command="{Binding SaveCommand}" Classes="accent" MinWidth="80" MinHeight="32" IsDefault="True"/>
+        </StackPanel>
+
+    </Grid>
+</Window>

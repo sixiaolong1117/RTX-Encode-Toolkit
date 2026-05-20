@@ -2,12 +2,15 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using RTX_Encode_Toolkit.Services;
 using RTX_Encode_Toolkit.ViewModels;
 
 namespace RTX_Encode_Toolkit.Views;
 
 public partial class MainWindow : Window
 {
+    private readonly Localization _localization = Localization.Instance;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -18,11 +21,11 @@ public partial class MainWindow : Window
         var files = await StorageProvider.OpenFilePickerAsync(
             new FilePickerOpenOptions
             {
-                Title = "选择输入视频",
+                Title = _localization["SelectInputVideo"],
                 AllowMultiple = false,
                 FileTypeFilter =
                 [
-                    new FilePickerFileType("视频文件")
+                    new FilePickerFileType(_localization["VideoFiles"])
                     {
                         Patterns = ["*.mp4", "*.mkv", "*.mov", "*.avi", "*.webm", "*.m2ts", "*.ts"]
                     },
@@ -41,7 +44,7 @@ public partial class MainWindow : Window
         var folders = await StorageProvider.OpenFolderPickerAsync(
             new FolderPickerOpenOptions
             {
-                Title = "选择输出目录",
+                Title = _localization["SelectOutputDir"],
                 AllowMultiple = false
             });
 
@@ -50,6 +53,7 @@ public partial class MainWindow : Window
             viewModel.SetOutputDirectory(folders[0].Path.LocalPath);
         }
     }
+
 
     private void LogTextBox_TextChanged(object? sender, TextChangedEventArgs e)
     {

@@ -399,45 +399,66 @@ public sealed class NvencToolManager
     {
         var normalizedInstallDirectory = Path.GetFullPath(installDirectory);
         using var archive = SevenZipArchive.Open(archivePath);
+        var entries = archive.Entries.Where(entry => !entry.IsDirectory).ToList();
+        var totalFiles = entries.Count;
         var extractedFiles = 0;
+        var syncLock = new object();
 
-        foreach (var entry in archive.Entries.Where(entry => !entry.IsDirectory))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var entryPath = entry.Key;
-            if (string.IsNullOrWhiteSpace(entryPath))
+        // Use parallel extraction with large buffer for maximum CPU utilization
+        Parallel.ForEach(
+            entries,
+            new ParallelOptions
             {
-                continue;
-            }
-
-            var destinationPath = Path.GetFullPath(Path.Combine(normalizedInstallDirectory, entryPath));
-            if (!destinationPath.StartsWith(normalizedInstallDirectory, StringComparison.OrdinalIgnoreCase))
+                MaxDegreeOfParallelism = Environment.ProcessorCount,
+                CancellationToken = cancellationToken
+            },
+            entry =>
             {
-                throw new InvalidOperationException($"压缩包内路径无效：{entryPath}");
-            }
+                cancellationToken.ThrowIfCancellationRequested();
 
-            var destinationDirectory = Path.GetDirectoryName(destinationPath);
-            if (!string.IsNullOrEmpty(destinationDirectory))
-            {
-                Directory.CreateDirectory(destinationDirectory);
-            }
+                var entryPath = entry.Key;
+                if (string.IsNullOrWhiteSpace(entryPath))
+                {
+                    return;
+                }
 
-            using (var input = entry.OpenEntryStream())
-            using (var output = File.Create(destinationPath))
-            {
-                input.CopyTo(output);
-            }
+                var destinationPath = Path.GetFullPath(Path.Combine(normalizedInstallDirectory, entryPath));
+                if (!destinationPath.StartsWith(normalizedInstallDirectory, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException($"压缩包内路径无效：{entryPath}");
+                }
 
-            extractedFiles++;
-            if (extractedFiles % 20 == 0)
-            {
-                progress?.Report($"已解压 {extractedFiles} 个文件...");
-            }
-        }
+                var destinationDirectory = Path.GetDirectoryName(destinationPath);
+                if (!string.IsNullOrEmpty(destinationDirectory))
+                {
+                    Directory.CreateDirectory(destinationDirectory);
+                }
 
-        progress?.Report($"已解压 {extractedFiles} 个文件。");
+                // Use 1MB buffer for faster I/O
+                using (var input = entry.OpenEntryStream())
+                using (var output = File.Create(destinationPath, 1024 * 1024))
+                {
+                    var buffer = new byte[1024 * 1024];
+                    int bytesRead;
+                    while ((bytesRead = input.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        output.Write(buffer, 0, bytesRead);
+                    }
+                }
+
+                lock (syncLock)
+                {
+                    extractedFiles++;
+                    if (extractedFiles % 20 == 0 || extractedFiles == totalFiles)
+                    {
+                        progress?.Report($"已解压 {extractedFiles}/{totalFiles} 个文件...");
+                    }
+                }
+            });
+
+        progress?.Report($"已解压 {totalFiles} 个文件。");
     }
+
 
     private static string ResolveVersionTag(GitHubReleaseAsset asset)
     {
