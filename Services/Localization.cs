@@ -74,7 +74,9 @@ public sealed class Localization : INotifyPropertyChanged
 
             // Encode section
             ["EncodeSection"] = "编码",
+            ["VideoCodec"] = "编码格式",
             ["Qvbr"] = "QVBR",
+
             ["Preset"] = "Preset",
             ["BFrames"] = "B Frames",
             ["TemporalAq"] = "Temporal AQ",
@@ -198,7 +200,9 @@ public sealed class Localization : INotifyPropertyChanged
 
             // Encode section
             ["EncodeSection"] = "Encode",
+            ["VideoCodec"] = "Video Codec",
             ["Qvbr"] = "QVBR",
+
             ["Preset"] = "Preset",
             ["BFrames"] = "B Frames",
             ["TemporalAq"] = "Temporal AQ",

@@ -54,9 +54,12 @@ public sealed class EncodeSettings
 
     public bool Deinterlace { get; init; }
 
+    public string VideoCodec { get; init; } = "HEVC";
+
     public int Qvbr { get; init; } = 20;
 
     public string NvencPreset { get; init; } = "P7";
+
 
     public int BFrames { get; init; } = 5;
 

@@ -189,11 +189,18 @@ public sealed class NvencCommandBuilder
             tags.Add($"fruc{settings.TargetFps}");
         }
 
-        tags.Add("hevc10");
+        var codecTag = settings.VideoCodec switch
+        {
+            "AV1" => "av1",
+            "H264" => "h264",
+            _ => "hevc10"
+        };
+        tags.Add(codecTag);
         if (settings.EnableHdr)
         {
             tags.Add("hdr10");
         }
+
 
         return Path.Combine(outputDirectory, string.Join("_", tags) + ".mkv");
     }
@@ -301,6 +308,13 @@ public sealed class NvencCommandBuilder
         string? vsrResolution,
         bool includeFruc)
     {
+        var (codec, profile, outputDepth) = settings.VideoCodec switch
+        {
+            "AV1" => ("av1", "main10", "10"),
+            "H264" => ("h264", "high", "8"),
+            _ => ("hevc", "main10", "10") // HEVC default
+        };
+
         var args = new List<string>
         {
             "--avhw",
@@ -309,11 +323,11 @@ public sealed class NvencCommandBuilder
             "-o",
             outputPath,
             "--codec",
-            "hevc",
+            codec,
             "--profile",
-            "main10",
+            profile,
             "--output-depth",
-            "10",
+            outputDepth,
             "--output-csp",
             "yuv420",
             "--qvbr",
@@ -328,6 +342,7 @@ public sealed class NvencCommandBuilder
             "3",
             "--aq"
         };
+
 
         if (settings.TemporalAq)
         {

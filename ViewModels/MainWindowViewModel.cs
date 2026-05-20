@@ -132,10 +132,16 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _nvencToolStatus = string.Empty;
 
+    [ObservableProperty]
+    private string _videoCodec = "HEVC";
+
+    public IReadOnlyList<string> VideoCodecs { get; } = ["HEVC", "AV1", "H264"];
+
     public IReadOnlyList<string> NvencPresets { get; } = ["P7", "P6", "P5", "P4", "P3", "P2", "P1"];
 
 
     public IReadOnlyList<string> AvsyncModes { get; } = ["auto", "forcecfr", "vfr"];
+
 
     public IReadOnlyList<string> NormalizeModes { get; } = ["Auto", "Force", "Off"];
 
@@ -387,7 +393,9 @@ public partial class MainWindowViewModel : ViewModelBase
             FrucNormalizePreset = FrucNormalizePreset,
             KeepTemporaryFiles = KeepTemporaryFiles,
             Deinterlace = Deinterlace,
+            VideoCodec = VideoCodec,
             Qvbr = Qvbr,
+
             NvencPreset = NvencPreset,
             BFrames = BFrames,
             TemporalAq = TemporalAq,

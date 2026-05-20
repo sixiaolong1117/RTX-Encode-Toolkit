@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 env:
-  PROJECT_PATH: RTX-Encode-Toolkit/RTX-Encode-Toolkit.csproj
+  PROJECT_PATH: RTX-Encode-Toolkit.csproj
   ARTIFACT_NAME: RTX-Encode-Toolkit-win-x64
   DOTNET_VERSION: 10.0.x
 

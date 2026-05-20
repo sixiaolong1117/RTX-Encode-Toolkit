@@ -164,25 +164,29 @@
                         <StackPanel Spacing="10">
                             <TextBlock Text="{services:Localization Key=EncodeSection}" Classes="sectionTitle"/>
 
-                            <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8">
-                                <TextBlock Text="{services:Localization Key=Qvbr}" Classes="label"/>
-                                <NumericUpDown Grid.Column="1" Minimum="1" Maximum="51" Increment="1" Value="{Binding Qvbr}"/>
+                            <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8">
+                                <TextBlock Text="{services:Localization Key=VideoCodec}" Classes="label"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding VideoCodecs}" SelectedItem="{Binding VideoCodec}"/>
 
-                                <TextBlock Grid.Row="1" Text="{services:Localization Key=Preset}" Classes="label"/>
-                                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding NvencPresets}" SelectedItem="{Binding NvencPreset}"/>
+                                <TextBlock Grid.Row="1" Text="{services:Localization Key=Qvbr}" Classes="label"/>
+                                <NumericUpDown Grid.Row="1" Grid.Column="1" Minimum="1" Maximum="51" Increment="1" Value="{Binding Qvbr}"/>
 
-                                <TextBlock Grid.Row="2" Text="{services:Localization Key=BFrames}" Classes="label"/>
-                                <NumericUpDown Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="8" Increment="1" Value="{Binding BFrames}"/>
+                                <TextBlock Grid.Row="2" Text="{services:Localization Key=Preset}" Classes="label"/>
+                                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding NvencPresets}" SelectedItem="{Binding NvencPreset}"/>
 
-                                <TextBlock Grid.Row="3" Text="{services:Localization Key=TemporalAq}" Classes="label"/>
-                                <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding TemporalAq}"/>
+                                <TextBlock Grid.Row="3" Text="{services:Localization Key=BFrames}" Classes="label"/>
+                                <NumericUpDown Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="8" Increment="1" Value="{Binding BFrames}"/>
 
-                                <TextBlock Grid.Row="4" Text="{services:Localization Key=Deinterlace}" Classes="label"/>
-                                <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding Deinterlace}"/>
+                                <TextBlock Grid.Row="4" Text="{services:Localization Key=TemporalAq}" Classes="label"/>
+                                <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding TemporalAq}"/>
 
-                                <TextBlock Grid.Row="5" Text="{services:Localization Key=Avsync}" Classes="label"/>
-                                <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding AvsyncModes}" SelectedItem="{Binding Avsync}"/>
+                                <TextBlock Grid.Row="5" Text="{services:Localization Key=Deinterlace}" Classes="label"/>
+                                <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding Deinterlace}"/>
+
+                                <TextBlock Grid.Row="6" Text="{services:Localization Key=Avsync}" Classes="label"/>
+                                <ComboBox Grid.Row="6" Grid.Column="1" ItemsSource="{Binding AvsyncModes}" SelectedItem="{Binding Avsync}"/>
                             </Grid>
+
 
                             <CheckBox Content="{services:Localization Key=KeepTempFiles}" IsChecked="{Binding KeepTemporaryFiles}"/>
                         </StackPanel>
