@@ -3,29 +3,51 @@
 
     <Styles.Resources>
         <ResourceDictionary>
-            <!-- WinUI 3 专用颜色 -->
-            <Color x:Key="WinUI3BackgroundColor">#F2F2F2</Color>
-            <Color x:Key="WinUI3BackgroundDarkColor">#1C1C1C</Color>
-            <Color x:Key="WinUI3CardBackgroundColor">#FFFFFF</Color>
-            <Color x:Key="WinUI3CardBackgroundDarkColor">#2C2C2C</Color>
-            <Color x:Key="WinUI3CardBorderColor">#E0E0E0</Color>
-            <Color x:Key="WinUI3CardBorderDarkColor">#3C3C3C</Color>
-            <Color x:Key="WinUI3TextPrimaryColor">#000000</Color>
-            <Color x:Key="WinUI3TextPrimaryDarkColor">#FFFFFF</Color>
-            <Color x:Key="WinUI3TextSecondaryColor">#666666</Color>
-            <Color x:Key="WinUI3TextSecondaryDarkColor">#999999</Color>
-            <Color x:Key="WinUI3BorderColor">#D0D0D0</Color>
-            <Color x:Key="WinUI3BorderDarkColor">#555555</Color>
-            <Color x:Key="WinUI3TitleBarColor">#E8E8E8</Color>
-            <Color x:Key="WinUI3TitleBarDarkColor">#2B2B2B</Color>
-            <Color x:Key="WinUI3SelectionColor">#005FB8</Color>
-            <Color x:Key="WinUI3SelectionDarkColor">#99C4FF</Color>
+            <!-- 全局默认字体（中文字体优先，Inter 作为英文字体回退） -->
+            <FontFamily x:Key="DefaultFont">Microsoft YaHei, Inter, sans-serif</FontFamily>
+
+            <!-- ===== 主题感知资源：深色/浅色自动适配 ===== -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <!-- WinUI 3 专用颜色（浅色） -->
+                    <Color x:Key="WinUI3BackgroundColor">#F2F2F2</Color>
+                    <Color x:Key="WinUI3CardBackgroundColor">#FFFFFF</Color>
+                    <Color x:Key="WinUI3CardBorderColor">#E0E0E0</Color>
+                    <Color x:Key="WinUI3TextPrimaryColor">#000000</Color>
+                    <Color x:Key="WinUI3TextSecondaryColor">#666666</Color>
+                    <Color x:Key="WinUI3BorderColor">#D0D0D0</Color>
+                    <Color x:Key="WinUI3TitleBarColor">#E8E8E8</Color>
+                    <Color x:Key="WinUI3SelectionColor">#005FB8</Color>
+
+                    <!-- 半透明背景资源（浅色主题） -->
+                    <Color x:Key="PanelBackground">#99FFFFFF</Color>
+                    <Color x:Key="InputBackground">#B3FFFFFF</Color>
+                    <Color x:Key="ButtonBackground">#B3FFFFFF</Color>
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Dark">
+                    <!-- WinUI 3 专用颜色（深色） -->
+                    <Color x:Key="WinUI3BackgroundColor">#1C1C1C</Color>
+                    <Color x:Key="WinUI3CardBackgroundColor">#2C2C2C</Color>
+                    <Color x:Key="WinUI3CardBorderColor">#3C3C3C</Color>
+                    <Color x:Key="WinUI3TextPrimaryColor">#FFFFFF</Color>
+                    <Color x:Key="WinUI3TextSecondaryColor">#999999</Color>
+                    <Color x:Key="WinUI3BorderColor">#555555</Color>
+                    <Color x:Key="WinUI3TitleBarColor">#2B2B2B</Color>
+                    <Color x:Key="WinUI3SelectionColor">#99C4FF</Color>
+
+                    <!-- 半透明背景资源（深色主题） -->
+                    <Color x:Key="PanelBackground">#992C2C2C</Color>
+                    <Color x:Key="InputBackground">#B32C2C2C</Color>
+                    <Color x:Key="ButtonBackground">#B32C2C2C</Color>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
     </Styles.Resources>
 
     <!-- WinUI 3 按钮样式 -->
     <Style Selector="Button">
-        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
+        <Setter Property="Background" Value="{DynamicResource ButtonBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -35,6 +57,8 @@
         <Setter Property="FontSize" Value="13" />
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <Style Selector="Button:pointerover /template/ ContentPresenter">
@@ -84,7 +108,7 @@
 
     <!-- WinUI 3 TextBox 样式 -->
     <Style Selector="TextBox">
-        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+        <Setter Property="Background" Value="{DynamicResource InputBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -105,7 +129,7 @@
 
     <!-- WinUI 3 ComboBox 样式 -->
     <Style Selector="ComboBox">
-        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+        <Setter Property="Background" Value="{DynamicResource InputBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -140,7 +164,7 @@
 
     <!-- WinUI 3 NumericUpDown 样式 -->
     <Style Selector="NumericUpDown">
-        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+        <Setter Property="Background" Value="{DynamicResource InputBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -175,18 +199,18 @@
         <Setter Property="Background" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
     </Style>
 
-    <!-- WinUI 3 SettingsCard 面板 -->
+    <!-- WinUI 3 SettingsCard 面板（半透明，让 Mica/Blur 材质穿透） -->
     <Style Selector="Border.settingsCard">
-        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+        <Setter Property="Background" Value="{DynamicResource PanelBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="16" />
     </Style>
 
-    <!-- WinUI 3 分组面板（无边框背景色） -->
+    <!-- WinUI 3 分组面板（半透明，无边框背景色） -->
     <Style Selector="Border.groupCard">
-        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+        <Setter Property="Background" Value="{DynamicResource PanelBackground}" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="16" />
     </Style>
@@ -229,6 +253,11 @@
         <Setter Property="Background" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
         <Setter Property="Height" Value="1" />
         <Setter Property="Margin" Value="0,4" />
+    </Style>
+
+    <!-- 全局字体：所有窗口继承 DefaultFont -->
+    <Style Selector="Window">
+        <Setter Property="FontFamily" Value="{DynamicResource DefaultFont}" />
     </Style>
 
     <!-- 标题栏区域 -->

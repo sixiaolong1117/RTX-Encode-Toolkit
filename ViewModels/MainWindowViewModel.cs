@@ -352,21 +352,36 @@ public partial class MainWindowViewModel : ViewModelBase
         return !IsEncoding && !IsToolInstalling;
     }
 
+    private Views.SettingsWindow? _settingsWindow;
+    private Views.AboutWindow? _aboutWindow;
+
     [RelayCommand]
     private void OpenSettings()
     {
-        var settingsWindow = new Views.SettingsWindow
+        if (_settingsWindow is { IsVisible: true })
+        {
+            _settingsWindow.Activate();
+            return;
+        }
+
+        _settingsWindow = new Views.SettingsWindow
         {
             DataContext = new SettingsViewModel(this)
         };
-        settingsWindow.Show();
+        _settingsWindow.Show();
     }
 
     [RelayCommand]
     private void OpenAbout()
     {
-        var aboutWindow = new Views.AboutWindow();
-        aboutWindow.Show();
+        if (_aboutWindow is { IsVisible: true })
+        {
+            _aboutWindow.Activate();
+            return;
+        }
+
+        _aboutWindow = new Views.AboutWindow();
+        _aboutWindow.Show();
     }
 
     private EncodeSettings CreateSettings()

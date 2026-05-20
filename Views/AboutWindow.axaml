@@ -75,7 +75,7 @@
             <Button Classes="repoLink"
                     Click="OpenRepository_Click">
                 <TextBlock TextDecorations="Underline"
-                           Text="GitHub Repository"
+                           Text="Repo"
                            TextWrapping="Wrap" />
             </Button>
 
