@@ -4,7 +4,7 @@
 
 <img src="Assets/rtx-encode-toolkit.png" alt="RTX Encode Toolkit" width="256">
 
-**基于 NVEncC 的 NVIDIA RTX 视频编码工具，支持 RTX VSR 超分、RTX HDR、NVOF FRUC 插帧**
+**基于 [NVEnc](https://github.com/rigaya/NVEnc) 的 NVIDIA RTX 视频编码工具，支持 RTX VSR 超分、RTX HDR、NVOF FRUC 插帧**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](RTX-Encode-Toolkit.csproj)
@@ -18,7 +18,7 @@
 
 ## 📖 简介
 
-RTX Encode Toolkit 是一款基于 [NVEncC](https://github.com/rigaya/NVEnc) 的 Windows 桌面应用程序，为 NVIDIA RTX 显卡用户提供图形化界面，轻松调用 RTX 显卡的 AI 视频增强功能：
+RTX Encode Toolkit 是一款基于 [NVEnc](https://github.com/rigaya/NVEnc) 的 Windows 桌面应用程序，为 NVIDIA RTX 显卡用户提供图形化界面，轻松调用 RTX 显卡的 AI 视频增强功能：
 
 - **RTX VSR (Video Super Resolution)** — AI 视频超分辨率，将低分辨率视频提升至高分辨率
 - **RTX HDR (NGX TrueHDR)** — AI 将 SDR 视频转换为 HDR 视频
@@ -40,7 +40,7 @@ RTX Encode Toolkit 是一款基于 [NVEncC](https://github.com/rigaya/NVEnc) 的
 
 ## 🖼️ 界面预览
 
-> 截图待补充
+![](/Assets/屏幕截图.png)
 
 ## 🚀 快速开始
 

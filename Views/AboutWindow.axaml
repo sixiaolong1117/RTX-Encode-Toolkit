@@ -51,6 +51,13 @@
                            Text="Repo"
                            TextWrapping="Wrap"/>
             </Button>
+
+            <Button Classes="repoLink"
+                    Click="OpenLicense_Click">
+                <TextBlock TextDecorations="Underline"
+                           Text="License"
+                           TextWrapping="Wrap"/>
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

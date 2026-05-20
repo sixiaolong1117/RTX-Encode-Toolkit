@@ -4,7 +4,7 @@
 
 <img src="Assets/rtx-encode-toolkit.png" alt="RTX Encode Toolkit" width="256">
 
-**An NVIDIA RTX video encoding tool based on NVEncC, supporting RTX VSR upscaling, RTX HDR, and NVOF FRUC frame interpolation**
+**An NVIDIA RTX video encoding tool based on [NVEnc](https://github.com/rigaya/NVEnc), supporting RTX VSR upscaling, RTX HDR, and NVOF FRUC frame interpolation**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](RTX-Encode-Toolkit.csproj)
@@ -18,7 +18,7 @@
 
 ## 📖 Introduction
 
-RTX Encode Toolkit is a Windows desktop application based on [NVEncC](https://github.com/rigaya/NVEnc), providing a graphical interface for NVIDIA RTX GPU users to easily leverage AI-powered video enhancement features:
+RTX Encode Toolkit is a Windows desktop application based on [NVEnc](https://github.com/rigaya/NVEnc), providing a graphical interface for NVIDIA RTX GPU users to easily leverage AI-powered video enhancement features:
 
 - **RTX VSR (Video Super Resolution)** — AI upscaling to enhance low-resolution videos to higher resolutions
 - **RTX HDR (NGX TrueHDR)** — AI-powered SDR to HDR conversion
@@ -40,7 +40,7 @@ RTX Encode Toolkit is a Windows desktop application based on [NVEncC](https://gi
 
 ## 🖼️ Screenshots
 
-> Screenshots coming soon
+![](/Assets/屏幕截图.png)
 
 ## 🚀 Quick Start
 

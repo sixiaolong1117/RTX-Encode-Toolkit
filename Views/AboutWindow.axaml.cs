@@ -13,6 +13,7 @@ public partial class AboutWindow : Window
 {
     private const string AvatarUrl = "https://avatars.githubusercontent.com/u/59590732";
     private const string RepositoryUrl = "https://github.com/sixiaolong1117/RTX-Encode-Toolkit";
+    private const string LicenseUrl = "https://github.com/sixiaolong1117/RTX-Encode-Toolkit/raw/refs/heads/master/LICENSE";
     private static readonly HttpClient HttpClient = CreateHttpClient();
 
     public AboutWindow()
@@ -45,9 +46,19 @@ public partial class AboutWindow : Window
 
     private void OpenRepository_Click(object? sender, RoutedEventArgs e)
     {
+        OpenUrl(RepositoryUrl);
+    }
+
+    private void OpenLicense_Click(object? sender, RoutedEventArgs e)
+    {
+        OpenUrl(LicenseUrl);
+    }
+
+    private static void OpenUrl(string url)
+    {
         var startInfo = new System.Diagnostics.ProcessStartInfo
         {
-            FileName = RepositoryUrl,
+            FileName = url,
             UseShellExecute = true
         };
         System.Diagnostics.Process.Start(startInfo);
