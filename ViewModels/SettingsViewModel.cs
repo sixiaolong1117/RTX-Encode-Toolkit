@@ -219,7 +219,6 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         _mainViewModel.UpdateStatusTexts();
-        _mainViewModel.UseExistingManagedNvenc();
     }
 
     [RelayCommand]

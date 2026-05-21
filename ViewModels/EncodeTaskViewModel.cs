@@ -194,6 +194,31 @@ public partial class EncodeTaskViewModel : ViewModelBase
     public double ProgressPercentValue => ProgressPercent ?? 0;
     public bool CanOpenFolder => GetExplorerTarget() is not null;
 
+    public bool HasVsr => Settings.EnableVsr;
+    public bool HasHdr => Settings.EnableHdr;
+    public bool HasFruc => Settings.EnableFrameInterpolation;
+
+    public string VsrSummary =>
+        !Settings.EnableVsr ? string.Empty
+        : Settings.AutoVsrResolution
+            ? $"VSR Q{Settings.VsrQuality} ({Settings.VsrLongEdge}p)"
+            : $"VSR Q{Settings.VsrQuality} ({Settings.VsrResolution})";
+
+    public string HdrSummary =>
+        !Settings.EnableHdr ? string.Empty
+        : $"HDR C{Settings.HdrContrast} S{Settings.HdrSaturation}";
+
+    public string FrucSummary =>
+        !Settings.EnableFrameInterpolation ? string.Empty
+        : Settings.FrucNormalizeMode != "Off"
+            ? $"FRUC {Settings.TargetFps}fps ({Settings.FrucNormalizeMode})"
+            : $"FRUC {Settings.TargetFps}fps";
+
+    public string EncodeSummary =>
+        Settings.Deinterlace
+            ? $"{Settings.VideoCodec} QVBR={Settings.Qvbr} {Settings.NvencPreset} | Deint"
+            : $"{Settings.VideoCodec} QVBR={Settings.Qvbr} {Settings.NvencPreset}";
+
     [RelayCommand(CanExecute = nameof(CanCancel))]
     private void Cancel()
     {

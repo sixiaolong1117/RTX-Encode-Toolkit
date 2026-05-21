@@ -13,7 +13,6 @@ namespace RTX_Encode_Toolkit.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly Localization _localization = Localization.Instance;
-    private readonly NvencToolManager _nvencToolManager = new();
     private readonly ProcessRunner _processRunner = new();
     private readonly NvencCommandBuilder _commandBuilder;
 
@@ -31,9 +30,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _statusText = string.Empty;
 
     [ObservableProperty]
-    private bool _isToolInstalling;
-
-    [ObservableProperty]
     private string _nvencToolStatus = string.Empty;
 
     public EncodeSettingsEditorViewModel Editor { get; }
@@ -42,7 +38,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private bool IsQueueBusy => Queue.IsBusy;
 
-    public bool IsBusy => IsToolInstalling || IsQueueBusy;
+    public bool IsBusy => IsQueueBusy;
     public bool HasStatusText => !string.IsNullOrWhiteSpace(StatusText);
 
     public MainWindowViewModel()
@@ -60,7 +56,6 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 OnPropertyChanged(nameof(IsBusy));
                 CancelAllCommand.NotifyCanExecuteChanged();
-                InstallOrUpdateNvencCommand.NotifyCanExecuteChanged();
             }
         };
 
@@ -87,23 +82,11 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 SyncToolPathsToEditor();
             }
-            else if (args.PropertyName is nameof(IsToolInstalling))
-            {
-                OnPropertyChanged(nameof(IsBusy));
-                AddTaskCommand.NotifyCanExecuteChanged();
-                CancelAllCommand.NotifyCanExecuteChanged();
-                InstallOrUpdateNvencCommand.NotifyCanExecuteChanged();
-            }
-            else if (args.PropertyName is nameof(NvencToolStatus))
-            {
-                // Handled in partial OnIsToolInstallingChanged/OnNvencToolStatusChanged
-            }
 
             UpdateCommandPreview();
         };
 
-        UpdateStatusTexts();
-        UseExistingManagedNvenc();
+        UpdateNvencStatus();
     }
 
     private void SyncToolPathsToEditor()
@@ -116,7 +99,7 @@ public partial class MainWindowViewModel : ViewModelBase
     internal void UpdateStatusTexts()
     {
         StatusText = string.Empty;
-        NvencToolStatus = GetNvencToolStatusText();
+        UpdateNvencStatus();
     }
 
     partial void OnStatusTextChanged(string value)
@@ -124,15 +107,48 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasStatusText));
     }
 
-    private string GetNvencToolStatusText()
+    private void UpdateNvencStatus()
     {
-        var existingNvenc = _nvencToolManager.FindExistingNvenc();
-        if (existingNvenc is null)
+        // Check if NVEncC64.exe is available via PATH or configured path
+        var path = NvencPath;
+        if (string.IsNullOrWhiteSpace(path))
         {
-            return _localization["NvencNotFound"];
+            NvencToolStatus = _localization["NvencUsingPath"];
+            return;
         }
 
-        return _localization["NvencFound"] + existingNvenc;
+        // If it's a simple filename, check PATH
+        if (!path.Contains(System.IO.Path.DirectorySeparatorChar) && !path.Contains(System.IO.Path.AltDirectorySeparatorChar))
+        {
+            var envPaths = Environment.GetEnvironmentVariable("PATH")?.Split(System.IO.Path.PathSeparator) ?? [];
+            foreach (var dir in envPaths)
+            {
+                try
+                {
+                    if (System.IO.File.Exists(System.IO.Path.Combine(dir.Trim(), path)))
+                    {
+                        NvencToolStatus = _localization["NvencUsingPath"];
+                        return;
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            NvencToolStatus = _localization["NvencNotFound"];
+            return;
+        }
+
+        // It's a full path
+        if (System.IO.File.Exists(path))
+        {
+            NvencToolStatus = _localization["NvencFound"] + path;
+        }
+        else
+        {
+            NvencToolStatus = _localization["NvencNotFound"];
+        }
     }
 
     public void SetInputPath(string path)
@@ -179,7 +195,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private bool CanAddTask()
     {
-        return Editor.HasInputPaths && !IsToolInstalling;
+        return Editor.HasInputPaths;
     }
 
     [RelayCommand(CanExecute = nameof(CanCancelAll))]
@@ -191,41 +207,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool CanCancelAll()
     {
         return IsQueueBusy;
-    }
-
-    [RelayCommand(CanExecute = nameof(CanInstallOrUpdateNvenc))]
-    private async Task InstallOrUpdateNvencAsync()
-    {
-        IsToolInstalling = true;
-        StatusText = _localization["StatusInstallingNvenc"];
-        var progress = new Progress<string>(message =>
-        {
-            // UI status display
-            StatusText = $"[NVEnc] {message}";
-        });
-
-        try
-        {
-            StatusText = _localization["NvencDownloadStart"];
-            var result = await _nvencToolManager.InstallOrUpdateAsync(progress, CancellationToken.None);
-            NvencPath = result.ExecutablePath;
-            NvencToolStatus = $"NVEnc：{result.VersionTag} ({result.InstallDirectory})";
-            StatusText = _localization["StatusNvencInstalled"];
-        }
-        catch (Exception ex)
-        {
-            StatusText = _localization["StatusNvencInstallFailed"];
-            NvencToolStatus = _localization["StatusNvencInstallFailed"] + "：" + ex.Message;
-        }
-        finally
-        {
-            IsToolInstalling = false;
-        }
-    }
-
-    private bool CanInstallOrUpdateNvenc()
-    {
-        return !IsQueueBusy && !IsToolInstalling;
     }
 
     private Views.SettingsWindow? _settingsWindow;
@@ -258,18 +239,5 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _aboutWindow = new Views.AboutWindow();
         _aboutWindow.Show();
-    }
-
-    internal void UseExistingManagedNvenc()
-    {
-        var existingNvenc = _nvencToolManager.FindExistingNvenc();
-        if (existingNvenc is null)
-        {
-            NvencToolStatus = _localization["NvencNotFound"];
-            return;
-        }
-
-        NvencPath = existingNvenc;
-        NvencToolStatus = _localization["NvencFound"] + existingNvenc;
     }
 }

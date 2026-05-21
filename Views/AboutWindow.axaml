@@ -29,15 +29,6 @@
     </Window.Styles>
 
     <Grid Margin="0">
-
-        <!-- ========== WinUI 3 风格标题栏 ========== -->
-        <Border Classes="titleBar" Padding="16,0" Height="44" VerticalAlignment="Top">
-            <TextBlock Text="{services:Localization Key=AboutTitle}"
-                       FontSize="15"
-                       FontWeight="SemiBold"
-                       VerticalAlignment="Center" />
-        </Border>
-
         <!-- ========== 内容区域 ========== -->
         <StackPanel HorizontalAlignment="Center"
                     VerticalAlignment="Center"

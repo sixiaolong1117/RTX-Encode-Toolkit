@@ -29,9 +29,6 @@ public sealed class Localization : INotifyPropertyChanged
             ["StatusCancelled"] = "已取消",
             ["StatusFailed"] = "失败",
             ["StatusLogCleared"] = "日志已清空",
-            ["StatusInstallingNvenc"] = "正在安装 NVEnc",
-            ["StatusNvencInstalled"] = "NVEnc 安装完成",
-            ["StatusNvencInstallFailed"] = "NVEnc 安装失败",
 
             // Buttons
             ["AddTask"] = "添加任务",
@@ -120,8 +117,6 @@ public sealed class Localization : INotifyPropertyChanged
             ["NvencNoFruc"] = "当前 NVEncC64.exe 不包含 FRUC 插帧支持。",
             ["NvencCheckFeaturesFailed"] = "无法读取 --check-features，继续让 NVEncC 在编码时判断 FRUC 可用性。",
             ["NvencFrucNotConfirmed"] = "未确认 NVOF FRUC=yes；如果 GPU 或驱动不支持，编码阶段会失败。",
-            ["NvencDownloadStart"] = "开始下载/更新 NVEncC x64...",
-            ["NvencPathUpdated"] = "NVEncC 路径已更新：",
 
             // File picker
             ["SelectInputVideo"] = "选择输入视频",
@@ -165,9 +160,6 @@ public sealed class Localization : INotifyPropertyChanged
             ["StatusCancelled"] = "Cancelled",
             ["StatusFailed"] = "Failed",
             ["StatusLogCleared"] = "Log cleared",
-            ["StatusInstallingNvenc"] = "Installing NVEnc",
-            ["StatusNvencInstalled"] = "NVEnc installed",
-            ["StatusNvencInstallFailed"] = "NVEnc installation failed",
 
             // Buttons
             ["AddTask"] = "Add Task",
@@ -256,8 +248,6 @@ public sealed class Localization : INotifyPropertyChanged
             ["NvencNoFruc"] = "Current NVEncC64.exe does not support FRUC frame interpolation.",
             ["NvencCheckFeaturesFailed"] = "Cannot read --check-features, will let NVEncC determine FRUC availability during encoding.",
             ["NvencFrucNotConfirmed"] = "NVOF FRUC=yes not confirmed; encoding may fail if GPU or driver does not support it.",
-            ["NvencDownloadStart"] = "Starting download/update NVEncC x64...",
-            ["NvencPathUpdated"] = "NVEncC path updated: ",
 
             // File picker
             ["SelectInputVideo"] = "Select Input Video",

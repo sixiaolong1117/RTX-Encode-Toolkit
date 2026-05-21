@@ -93,17 +93,45 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="vm:EncodeTaskViewModel">
                                     <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="16,6" ColumnSpacing="8">
-                                        <StackPanel Spacing="2">
+                                        <StackPanel Spacing="3">
                                             <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Text="{Binding StatusText}" FontSize="12" Classes="statusText"/>
-                                            <TextBlock Text="{Binding DurationText}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                <TextBlock Text="{Binding StatusText}" FontSize="12" Classes="statusText" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding DurationText}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <!-- 参数设置标签行 -->
+                                            <WrapPanel Orientation="Horizontal">
+                                                <Border Padding="5,1" CornerRadius="3" Margin="0,0,4,2"
+                                                        Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                                        IsVisible="{Binding HasVsr}">
+                                                    <TextBlock Text="{Binding VsrSummary}" FontSize="10" FontWeight="Medium"
+                                                               Foreground="{DynamicResource SystemAccentBrush}" />
+                                                </Border>
+                                                <Border Padding="5,1" CornerRadius="3" Margin="0,0,4,2"
+                                                        Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                                        IsVisible="{Binding HasHdr}">
+                                                    <TextBlock Text="{Binding HdrSummary}" FontSize="10" FontWeight="Medium"
+                                                               Foreground="{DynamicResource SystemAccentBrush}" />
+                                                </Border>
+                                                <Border Padding="5,1" CornerRadius="3" Margin="0,0,4,2"
+                                                        Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                                        IsVisible="{Binding HasFruc}">
+                                                    <TextBlock Text="{Binding FrucSummary}" FontSize="10" FontWeight="Medium"
+                                                               Foreground="{DynamicResource SystemAccentBrush}" />
+                                                </Border>
+                                                <Border Padding="5,1" CornerRadius="3" Margin="0,0,4,2"
+                                                        Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+                                                    <TextBlock Text="{Binding EncodeSummary}" FontSize="10" FontWeight="Medium"
+                                                               Foreground="{DynamicResource SystemAccentBrush}" />
+                                                </Border>
+                                            </WrapPanel>
                                             <ProgressBar Minimum="0"
                                                          Maximum="100"
                                                          Value="{Binding ProgressPercentValue}"
                                                          IsIndeterminate="{Binding IsProgressIndeterminate}"
                                                          IsVisible="{Binding IsActive}"
                                                          Height="4"
-                                                         Margin="0,4,0,0"/>
+                                                         Margin="0,2,0,0"/>
                                             <TextBlock Text="{Binding ProgressText}"
                                                        IsVisible="{Binding HasProgressText}"
                                                        FontSize="11"
