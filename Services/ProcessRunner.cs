@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,21 +15,6 @@ public sealed class ProcessRunner
     {
         using var process = CreateProcess(command);
 
-        process.OutputDataReceived += (_, args) =>
-        {
-            if (args.Data is not null)
-            {
-                output?.Report(args.Data);
-            }
-        };
-        process.ErrorDataReceived += (_, args) =>
-        {
-            if (args.Data is not null)
-            {
-                output?.Report(args.Data);
-            }
-        };
-
         try
         {
             if (!process.Start())
@@ -41,16 +27,25 @@ public sealed class ProcessRunner
             throw new InvalidOperationException($"无法启动 {command.FileName}，请检查路径或 PATH 环境变量。", ex);
         }
 
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
+        var outputTask = PumpOutputAsync(process.StandardOutput, output, cancellationToken);
+        var errorTask = PumpOutputAsync(process.StandardError, output, cancellationToken);
 
         try
         {
             await process.WaitForExitAsync(cancellationToken);
+            await Task.WhenAll(outputTask, errorTask);
         }
         catch (OperationCanceledException)
         {
             KillProcessTree(process);
+            try
+            {
+                await Task.WhenAll(outputTask, errorTask);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+
             throw;
         }
 
@@ -112,6 +107,65 @@ public sealed class ProcessRunner
         }
 
         return new Process { StartInfo = startInfo, EnableRaisingEvents = true };
+    }
+
+    private static async Task PumpOutputAsync(
+        StreamReader reader,
+        IProgress<string>? output,
+        CancellationToken cancellationToken)
+    {
+        var buffer = new char[1024];
+        var line = new StringBuilder();
+        var previousWasCarriageReturn = false;
+
+        while (true)
+        {
+            var read = await reader.ReadAsync(
+                buffer.AsMemory(0, buffer.Length),
+                cancellationToken);
+            if (read == 0)
+            {
+                break;
+            }
+
+            for (var index = 0; index < read; index++)
+            {
+                var ch = buffer[index];
+                if (ch == '\r')
+                {
+                    FlushLine(line, output);
+                    previousWasCarriageReturn = true;
+                    continue;
+                }
+
+                if (ch == '\n')
+                {
+                    if (!previousWasCarriageReturn)
+                    {
+                        FlushLine(line, output);
+                    }
+
+                    previousWasCarriageReturn = false;
+                    continue;
+                }
+
+                previousWasCarriageReturn = false;
+                line.Append(ch);
+            }
+        }
+
+        FlushLine(line, output);
+    }
+
+    private static void FlushLine(StringBuilder line, IProgress<string>? output)
+    {
+        if (line.Length == 0)
+        {
+            return;
+        }
+
+        output?.Report(line.ToString());
+        line.Clear();
     }
 
     private static void KillProcessTree(Process process)

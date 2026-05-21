@@ -22,7 +22,9 @@ public sealed class Localization : INotifyPropertyChanged
 
             // Status
             ["StatusReady"] = "准备就绪",
-            ["StatusEncoding"] = "准备编码",
+            ["StatusQueued"] = "排队中",
+            ["StatusEncoding"] = "编码中",
+            ["StatusCancelling"] = "取消中",
             ["StatusCompleted"] = "编码完成",
             ["StatusCancelled"] = "已取消",
             ["StatusFailed"] = "失败",
@@ -32,10 +34,14 @@ public sealed class Localization : INotifyPropertyChanged
             ["StatusNvencInstallFailed"] = "NVEnc 安装失败",
 
             // Buttons
+            ["AddTask"] = "添加任务",
+            ["CancelAll"] = "全部取消",
             ["ClearLog"] = "清空日志",
             ["Cancel"] = "取消",
             ["StartEncode"] = "开始编码",
             ["Browse"] = "...",
+            ["Remove"] = "移除",
+            ["OpenFolder"] = "📂",
 
             // File section
             ["FileSection"] = "文件",
@@ -67,6 +73,7 @@ public sealed class Localization : INotifyPropertyChanged
             ["FrucSection"] = "NVOF FRUC 插帧",
             ["TargetFps"] = "目标帧率",
             ["SkipHighFps"] = "高帧率跳过",
+            ["SkipHighFpsHelp"] = "开启后，如果源视频平均帧率已经大于或等于目标帧率，就不会再执行 FRUC 插帧，避免把本来已经足够高帧率的视频重复处理。",
             ["CfrPreprocess"] = "CFR 预处理",
             ["CfrFps"] = "CFR 帧率",
             ["PreprocessCrf"] = "预处理 CRF",
@@ -86,6 +93,9 @@ public sealed class Localization : INotifyPropertyChanged
 
             // Command preview
             ["CommandPreview"] = "命令预览",
+
+            // Task queue
+            ["TaskQueue"] = "任务队列",
 
             // Log
             ["Log"] = "日志",
@@ -142,15 +152,15 @@ public sealed class Localization : INotifyPropertyChanged
             ["Close"] = "关闭",
         },
         ["en-US"] = new()
-
-
         {
             // Window
             ["WindowTitle"] = "RTX Encode Toolkit",
 
             // Status
             ["StatusReady"] = "Ready",
-            ["StatusEncoding"] = "Preparing to encode",
+            ["StatusQueued"] = "Queued",
+            ["StatusEncoding"] = "Encoding",
+            ["StatusCancelling"] = "Cancelling",
             ["StatusCompleted"] = "Encoding completed",
             ["StatusCancelled"] = "Cancelled",
             ["StatusFailed"] = "Failed",
@@ -160,10 +170,14 @@ public sealed class Localization : INotifyPropertyChanged
             ["StatusNvencInstallFailed"] = "NVEnc installation failed",
 
             // Buttons
+            ["AddTask"] = "Add Task",
+            ["CancelAll"] = "Cancel All",
             ["ClearLog"] = "Clear Log",
             ["Cancel"] = "Cancel",
             ["StartEncode"] = "Start Encode",
             ["Browse"] = "...",
+            ["Remove"] = "Remove",
+            ["OpenFolder"] = "📂",
 
             // File section
             ["FileSection"] = "File",
@@ -195,6 +209,7 @@ public sealed class Localization : INotifyPropertyChanged
             ["FrucSection"] = "NVOF FRUC Frame Interpolation",
             ["TargetFps"] = "Target FPS",
             ["SkipHighFps"] = "Skip High FPS Source",
+            ["SkipHighFpsHelp"] = "When enabled, FRUC is skipped if the source average frame rate is already greater than or equal to the target FPS, avoiding unnecessary interpolation.",
             ["CfrPreprocess"] = "CFR Preprocess",
             ["CfrFps"] = "CFR FPS",
             ["PreprocessCrf"] = "Preprocess CRF",
@@ -214,6 +229,9 @@ public sealed class Localization : INotifyPropertyChanged
 
             // Command preview
             ["CommandPreview"] = "Command Preview",
+
+            // Task queue
+            ["TaskQueue"] = "Task Queue",
 
             // Log
             ["Log"] = "Log",
@@ -269,8 +287,6 @@ public sealed class Localization : INotifyPropertyChanged
             ["Save"] = "Save",
             ["Close"] = "Close",
         }
-
-
     };
 
     public string CurrentCulture
@@ -283,7 +299,6 @@ public sealed class Localization : INotifyPropertyChanged
                 _currentCulture = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Strings));
-
             }
         }
     }
@@ -330,7 +345,3 @@ public sealed class LocalizationStrings
 
     public string this[string key] => _localization[key];
 }
-
-
-
-

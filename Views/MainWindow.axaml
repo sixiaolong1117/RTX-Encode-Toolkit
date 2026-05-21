@@ -48,20 +48,19 @@
                             VerticalAlignment="Center">
                     <TextBlock Text="{Binding StatusText}"
                                Classes="statusText"
-                               VerticalAlignment="Center" />
+                               VerticalAlignment="Center"
+                               IsVisible="{Binding HasStatusText}" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal"
                             Spacing="6"
                             VerticalAlignment="Center">
-                    <Button Content="{services:Localization Key=StartEncode}"
-                            Command="{Binding StartEncodeCommand}"
+                    <Button Content="{services:Localization Key=AddTask}"
+                            Click="OpenAddTask_Click"
                             Classes="accent"
                             MinWidth="100" />
-                    <Button Content="{services:Localization Key=Cancel}"
-                            Command="{Binding CancelEncodeCommand}" />
-                    <Button Content="{services:Localization Key=ClearLog}"
-                            Command="{Binding ClearLogCommand}" />
+                    <Button Content="{services:Localization Key=CancelAll}"
+                            Command="{Binding CancelAllCommand}" />
                     <Button Content="{services:Localization Key=Settings}"
                             Command="{Binding OpenSettingsCommand}" />
                     <Button Content="{services:Localization Key=About}"
@@ -77,201 +76,64 @@
                      IsVisible="{Binding IsBusy}" />
 
         <!-- ========== 主内容区域 ========== -->
-        <Grid Grid.Row="2" ColumnDefinitions="420,*" Margin="16,12,16,16" ColumnSpacing="14">
+        <Grid Grid.Row="2" RowDefinitions="*,*" Margin="16,12,16,16" RowSpacing="12">
 
-            <!-- 左侧：设置面板 -->
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Spacing="12">
+            <!-- 任务队列列表 -->
+            <Border Grid.Row="0" Classes="settingsCard" Padding="0">
+                    <Grid RowDefinitions="Auto,*" Margin="16">
+                        <TextBlock Text="{services:Localization Key=TaskQueue}" Classes="sectionTitle" Margin="0,0,0,8"/>
+                        <ListBox Grid.Row="1"
+                                 ItemsSource="{Binding Queue.Tasks}"
+                                 SelectedItem="{Binding Queue.SelectedTask, Mode=TwoWay}"
+                                 SelectionMode="Single"
 
-                    <!-- 文件选择区域 -->
-                    <Border Classes="settingsCard">
-                        <StackPanel Spacing="12">
-                            <TextBlock Text="{services:Localization Key=FileSection}" Classes="sectionTitle"/>
+                                 Margin="-16,0"
+                                 Background="Transparent"
+                                 BorderThickness="0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:EncodeTaskViewModel">
+                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="16,6" ColumnSpacing="8">
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding StatusText}" FontSize="12" Classes="statusText"/>
+                                            <TextBlock Text="{Binding DurationText}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}"/>
+                                            <ProgressBar Minimum="0"
+                                                         Maximum="100"
+                                                         Value="{Binding ProgressPercentValue}"
+                                                         IsIndeterminate="{Binding IsProgressIndeterminate}"
+                                                         IsVisible="{Binding IsActive}"
+                                                         Height="4"
+                                                         Margin="0,4,0,0"/>
+                                            <TextBlock Text="{Binding ProgressText}"
+                                                       IsVisible="{Binding HasProgressText}"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="1"
+                                                Content="{services:Localization Key=Cancel}"
+                                                Command="{Binding CancelCommand}"
+                                                IsVisible="{Binding CanCancel}"
+                                                MinWidth="60" MinHeight="28" FontSize="12"/>
+                                        <Button Grid.Column="2"
+                                                Content="{services:Localization Key=Remove}"
+                                                Command="{Binding RemoveCommand}"
+                                                IsVisible="{Binding CanRemove}"
+                                                MinWidth="60" MinHeight="28" FontSize="12"/>
+                                        <Button Grid.Column="3"
+                                                Content="{services:Localization Key=OpenFolder}"
+                                                Command="{Binding OpenOutputCommand}"
+                                                IsVisible="{Binding CanOpenFolder}"
+                                                MinWidth="28" MinHeight="28" FontSize="12"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+            </Border>
 
-                            <Grid ColumnDefinitions="90,*,Auto" RowDefinitions="Auto,Auto" RowSpacing="10" ColumnSpacing="8">
-                                <TextBlock Text="{services:Localization Key=InputVideo}" Classes="label"/>
-                                <TextBox Grid.Column="1" Text="{Binding InputPath}"
-                                         PlaceholderText="{services:Localization Key=InputPlaceholder}"/>
-                                <Button Grid.Column="2" Content="{services:Localization Key=Browse}"
-                                        Click="BrowseInput_Click" MinWidth="70"/>
-
-                                <TextBlock Grid.Row="1" Text="{services:Localization Key=OutputDirectory}" Classes="label"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding OutputDirectory}"
-                                         PlaceholderText="{services:Localization Key=OutputPlaceholder}"/>
-                                <Button Grid.Row="1" Grid.Column="2" Content="{services:Localization Key=Browse}"
-                                        Click="BrowseOutput_Click" MinWidth="70"/>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- VSR 区域 -->
-                    <Border Classes="settingsCard">
-                        <StackPanel Spacing="12">
-                            <CheckBox Content="{services:Localization Key=VsrSection}"
-                                      IsChecked="{Binding EnableVsr}"
-                                      FontWeight="SemiBold"
-                                      FontSize="14"/>
-
-                            <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
-                                <TextBlock Text="{services:Localization Key=AutoLongEdge}" Classes="label"/>
-                                <CheckBox Grid.Column="1" IsChecked="{Binding AutoVsrResolution}"/>
-
-                                <TextBlock Grid.Row="1" Text="{services:Localization Key=LongEdgePixels}" Classes="label"/>
-                                <NumericUpDown Grid.Row="1" Grid.Column="1" Minimum="2" Maximum="8192"
-                                               Increment="2" Value="{Binding VsrLongEdge}"/>
-
-                                <TextBlock Grid.Row="2" Text="{services:Localization Key=VsrQuality}" Classes="label"/>
-                                <NumericUpDown Grid.Row="2" Grid.Column="1" Minimum="1" Maximum="4"
-                                               Increment="1" Value="{Binding VsrQuality}"/>
-                            </Grid>
-
-                            <TextBox Text="{Binding VsrResolution}" PlaceholderText="{services:Localization Key=FixedResolution}"
-                                     IsVisible="{Binding !AutoVsrResolution}"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- HDR 区域 -->
-                    <Border Classes="settingsCard">
-                        <StackPanel Spacing="12">
-                            <CheckBox Content="{services:Localization Key=HdrSection}"
-                                      IsChecked="{Binding EnableHdr}"
-                                      FontWeight="SemiBold"
-                                      FontSize="14"/>
-
-                            <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="10">
-                                <TextBlock Text="{services:Localization Key=Contrast}" Classes="label"/>
-                                <NumericUpDown Grid.Column="1" Minimum="0" Maximum="200"
-                                               Increment="1" Value="{Binding HdrContrast}"/>
-
-                                <TextBlock Grid.Row="1" Text="{services:Localization Key=Saturation}" Classes="label"/>
-                                <NumericUpDown Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="200"
-                                               Increment="1" Value="{Binding HdrSaturation}"/>
-
-                                <TextBlock Grid.Row="2" Text="{services:Localization Key=MiddleGray}" Classes="label"/>
-                                <NumericUpDown Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100"
-                                               Increment="1" Value="{Binding HdrMiddleGray}"/>
-
-                                <TextBlock Grid.Row="3" Text="{services:Localization Key=MaxLuminance}" Classes="label"/>
-                                <NumericUpDown Grid.Row="3" Grid.Column="1" Minimum="100" Maximum="4000"
-                                               Increment="50" Value="{Binding HdrMaxLuminance}"/>
-
-                                <TextBlock Grid.Row="4" Text="MaxCLL" Classes="label"/>
-                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding HdrMaxCll}"/>
-
-                                <TextBlock Grid.Row="5" Text="MasterDisplay" Classes="label"/>
-                                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding HdrMasterDisplay}"/>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- FRUC 区域 -->
-                    <Border Classes="settingsCard">
-                        <StackPanel Spacing="12">
-                            <CheckBox Content="{services:Localization Key=FrucSection}"
-                                      IsChecked="{Binding EnableFrameInterpolation}"
-                                      FontWeight="SemiBold"
-                                      FontSize="14"/>
-
-                            <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="10">
-                                <TextBlock Text="{services:Localization Key=TargetFps}" Classes="label"/>
-                                <NumericUpDown Grid.Column="1" Minimum="1" Maximum="240"
-                                               Increment="1" Value="{Binding TargetFps}"/>
-
-                                <TextBlock Grid.Row="1" Text="{services:Localization Key=SkipHighFps}" Classes="label"/>
-                                <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding SkipFrucWhenSourceFpsIsHigh}"/>
-
-                                <TextBlock Grid.Row="2" Text="{services:Localization Key=CfrPreprocess}" Classes="label"/>
-                                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding NormalizeModes}"
-                                          SelectedItem="{Binding FrucNormalizeMode}"/>
-
-                                <TextBlock Grid.Row="3" Text="{services:Localization Key=CfrFps}" Classes="label"/>
-                                <NumericUpDown Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="240"
-                                               Increment="0.001" Value="{Binding FrucNormalizeFps}"/>
-
-                                <TextBlock Grid.Row="4" Text="{services:Localization Key=PreprocessCrf}" Classes="label"/>
-                                <NumericUpDown Grid.Row="4" Grid.Column="1" Minimum="0" Maximum="51"
-                                               Increment="1" Value="{Binding FrucNormalizeCrf}"/>
-
-                                <TextBlock Grid.Row="5" Text="{services:Localization Key=PreprocessPreset}" Classes="label"/>
-                                <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding NormalizePresets}"
-                                          SelectedItem="{Binding FrucNormalizePreset}"/>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- 编码设置区域 -->
-                    <Border Classes="settingsCard">
-                        <StackPanel Spacing="12">
-                            <TextBlock Text="{services:Localization Key=EncodeSection}" Classes="sectionTitle"/>
-
-                            <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="10">
-                                <TextBlock Text="{services:Localization Key=VideoCodec}" Classes="label"/>
-                                <ComboBox Grid.Column="1" ItemsSource="{Binding VideoCodecs}"
-                                          SelectedItem="{Binding VideoCodec}"/>
-
-                                <TextBlock Grid.Row="1" Text="QVBR" Classes="label"/>
-                                <NumericUpDown Grid.Row="1" Grid.Column="1" Minimum="1" Maximum="51"
-                                               Increment="1" Value="{Binding Qvbr}"/>
-
-                                <TextBlock Grid.Row="2" Text="{services:Localization Key=Preset}" Classes="label"/>
-                                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding NvencPresets}"
-                                          SelectedItem="{Binding NvencPreset}"/>
-
-                                <TextBlock Grid.Row="3" Text="{services:Localization Key=BFrames}" Classes="label"/>
-                                <NumericUpDown Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="8"
-                                               Increment="1" Value="{Binding BFrames}"/>
-
-                                <TextBlock Grid.Row="4" Text="{services:Localization Key=TemporalAq}" Classes="label"/>
-                                <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding TemporalAq}"/>
-
-                                <TextBlock Grid.Row="5" Text="{services:Localization Key=Deinterlace}" Classes="label"/>
-                                <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding Deinterlace}"/>
-
-                                <TextBlock Grid.Row="6" Text="{services:Localization Key=Avsync}" Classes="label"/>
-                                <ComboBox Grid.Row="6" Grid.Column="1" ItemsSource="{Binding AvsyncModes}"
-                                          SelectedItem="{Binding Avsync}"/>
-                            </Grid>
-
-                            <Separator/>
-
-                            <CheckBox Content="{services:Localization Key=KeepTempFiles}"
-                                      IsChecked="{Binding KeepTemporaryFiles}"/>
-                        </StackPanel>
-                    </Border>
-
-                </StackPanel>
-            </ScrollViewer>
-
-            <!-- 右侧：命令预览和日志 -->
-            <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12">
-
-                <!-- 命令预览 -->
-                <Border Classes="settingsCard">
-                    <StackPanel Spacing="8">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="{services:Localization Key=CommandPreview}" Classes="sectionTitle" Margin="0"/>
-                            <Button Grid.Column="1" Content="Copy"
-                                    IsVisible="False"
-                                    MinWidth="60" MinHeight="26" FontSize="12"/>
-                        </Grid>
-                        <TextBox Classes="mono"
-                                 Text="{Binding CommandPreview}"
-                                 IsReadOnly="True"
-                                 AcceptsReturn="True"
-                                 TextWrapping="Wrap"
-                                 MinHeight="100"
-                                 MaxHeight="180"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- 进度条 -->
-                <ProgressBar Grid.Row="1"
-                             IsIndeterminate="{Binding IsBusy}"
-                             Height="3"
-                             IsVisible="{Binding IsBusy}" />
-
-                <!-- 日志区域 -->
-                <Border Grid.Row="2" Classes="settingsCard" Padding="0">
+            <!-- 日志区域（最后一个选中任务的日志） -->
+            <Border Grid.Row="1" Classes="settingsCard" Padding="0">
                     <Grid RowDefinitions="Auto,*" Margin="16">
                         <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
                             <TextBlock Text="{services:Localization Key=Log}" Classes="sectionTitle" Margin="0"/>
@@ -285,27 +147,23 @@
                         <ScrollViewer x:Name="LogScrollViewer"
                                       Grid.Row="1"
                                       VerticalScrollBarVisibility="Auto"
-                                      HorizontalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
                                       Margin="-16,0"
                                       Padding="16,0">
                             <TextBox x:Name="LogTextBox"
-                                     Classes="mono"
-                                     Text="{Binding LogText}"
-                                     IsReadOnly="True"
-                                     AcceptsReturn="True"
-                                     TextWrapping="Wrap"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     TextChanged="LogTextBox_TextChanged"/>
+                                      Classes="mono"
+                                      Text="{Binding Queue.SelectedTask.LogText, FallbackValue=''}"
+                                      IsReadOnly="True"
+                                      AcceptsReturn="True"
+                                      TextWrapping="Wrap"
+                                      HorizontalAlignment="Stretch"
+                                      MinWidth="0"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      TextChanged="LogTextBox_TextChanged"/>
                         </ScrollViewer>
                     </Grid>
-                </Border>
-
-                <!-- 最后输出路径 -->
-                <TextBlock Grid.Row="3"
-                           Text="{Binding LastOutputPath}"
-                           Classes="statusText" />
-            </Grid>
+            </Border>
         </Grid>
     </Grid>
 </Window>

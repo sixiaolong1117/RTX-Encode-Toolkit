@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -14,13 +12,12 @@ namespace RTX_Encode_Toolkit.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    private readonly Localization _localization = Localization.Instance;
+    private readonly NvencToolManager _nvencToolManager = new();
     private readonly ProcessRunner _processRunner = new();
     private readonly NvencCommandBuilder _commandBuilder;
-    private readonly NvencToolManager _nvencToolManager = new();
-    private CancellationTokenSource? _encodeCancellation;
 
-    private readonly Localization _localization = Localization.Instance;
-
+    // Tool paths (shared across all tasks, synced with SettingsWindow)
     [ObservableProperty]
     private string _nvencPath = "NVEncC64.exe";
 
@@ -31,100 +28,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _ffmpegPath = "ffmpeg.exe";
 
     [ObservableProperty]
-    private string _inputPath = string.Empty;
-
-    [ObservableProperty]
-    private string _outputDirectory = string.Empty;
-
-    [ObservableProperty]
-    private bool _enableVsr = true;
-
-    [ObservableProperty]
-    private bool _autoVsrResolution = true;
-
-    [ObservableProperty]
-    private int _vsrLongEdge = 3840;
-
-    [ObservableProperty]
-    private string _vsrResolution = "3840x-2";
-
-    [ObservableProperty]
-    private int _vsrQuality = 4;
-
-    [ObservableProperty]
-    private bool _enableHdr;
-
-    [ObservableProperty]
-    private int _hdrContrast = 125;
-
-    [ObservableProperty]
-    private int _hdrSaturation = 75;
-
-    [ObservableProperty]
-    private int _hdrMiddleGray = 44;
-
-    [ObservableProperty]
-    private int _hdrMaxLuminance = 1000;
-
-    [ObservableProperty]
-    private string _hdrMaxCll = "1000,400";
-
-    [ObservableProperty]
-    private string _hdrMasterDisplay = "G(13250,34500)B(7500,3000)R(34000,16000)WP(15635,16450)L(10000000,1)";
-
-    [ObservableProperty]
-    private bool _enableFrameInterpolation;
-
-    [ObservableProperty]
-    private int _targetFps = 120;
-
-    [ObservableProperty]
-    private bool _skipFrucWhenSourceFpsIsHigh = true;
-
-    [ObservableProperty]
-    private string _frucNormalizeMode = "Auto";
-
-    [ObservableProperty]
-    private double _frucNormalizeFps;
-
-    [ObservableProperty]
-    private int _frucNormalizeCrf = 10;
-
-    [ObservableProperty]
-    private string _frucNormalizePreset = "veryfast";
-
-    [ObservableProperty]
-    private bool _keepTemporaryFiles;
-
-    [ObservableProperty]
-    private bool _deinterlace;
-
-    [ObservableProperty]
-    private int _qvbr = 20;
-
-    [ObservableProperty]
-    private string _nvencPreset = "P7";
-
-    [ObservableProperty]
-    private int _bFrames = 5;
-
-    [ObservableProperty]
-    private bool _temporalAq = true;
-
-    [ObservableProperty]
-    private string _avsync = "auto";
-
-    [ObservableProperty]
     private string _statusText = string.Empty;
-
-    [ObservableProperty]
-    private string _logText = string.Empty;
-
-    [ObservableProperty]
-    private string _lastOutputPath = string.Empty;
-
-    [ObservableProperty]
-    private bool _isEncoding;
 
     [ObservableProperty]
     private bool _isToolInstalling;
@@ -132,72 +36,92 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _nvencToolStatus = string.Empty;
 
-    [ObservableProperty]
-    private string _videoCodec = "HEVC";
+    public EncodeSettingsEditorViewModel Editor { get; }
+    public EncodeQueueViewModel Queue { get; }
+    public event Action? TaskAdded;
 
-    public IReadOnlyList<string> VideoCodecs { get; } = ["HEVC", "AV1", "H264"];
+    private bool IsQueueBusy => Queue.IsBusy;
 
-    public IReadOnlyList<string> NvencPresets { get; } = ["P7", "P6", "P5", "P4", "P3", "P2", "P1"];
-
-
-    public IReadOnlyList<string> AvsyncModes { get; } = ["auto", "forcecfr", "vfr"];
-
-
-    public IReadOnlyList<string> NormalizeModes { get; } = ["Auto", "Force", "Off"];
-
-    public IReadOnlyList<string> NormalizePresets { get; } =
-        ["ultrafast", "superfast", "veryfast", "faster", "fast", "medium"];
-
-    public bool IsBusy => IsEncoding || IsToolInstalling;
-
-    public string CommandPreview
-    {
-        get
-        {
-            var settings = CreateSettings();
-            var builder = new StringBuilder();
-            if (settings.EnableFrameInterpolation && settings.FrucNormalizeMode != "Off")
-            {
-                builder.AppendLine(_localization["FfmpegCfrPrepass"]);
-                builder.AppendLine();
-            }
-
-            builder.Append(_commandBuilder.BuildPreviewCommand(settings).ToCommandLine());
-            return builder.ToString();
-        }
-    }
+    public bool IsBusy => IsToolInstalling || IsQueueBusy;
+    public bool HasStatusText => !string.IsNullOrWhiteSpace(StatusText);
 
     public MainWindowViewModel()
     {
         var videoProbeService = new VideoProbeService(_processRunner);
         _commandBuilder = new NvencCommandBuilder(videoProbeService);
-        UpdateStatusTexts();
-        UseExistingManagedNvenc();
 
-        PropertyChanged += (_, args) =>
+        var runner = new EncodeTaskRunner(_processRunner, _commandBuilder);
+        var queueService = new EncodeQueueService(runner);
+        Editor = new EncodeSettingsEditorViewModel(_commandBuilder);
+        Queue = new EncodeQueueViewModel(queueService);
+        Queue.PropertyChanged += (_, args) =>
         {
-            if (args.PropertyName is nameof(CommandPreview) or nameof(LogText) or nameof(IsBusy))
-            {
-                return;
-            }
-
-            OnPropertyChanged(nameof(CommandPreview));
-            if (args.PropertyName is nameof(IsEncoding) or nameof(IsToolInstalling))
+            if (args.PropertyName is nameof(Queue.IsBusy))
             {
                 OnPropertyChanged(nameof(IsBusy));
+                CancelAllCommand.NotifyCanExecuteChanged();
+                InstallOrUpdateNvencCommand.NotifyCanExecuteChanged();
+            }
+        };
+
+        SyncToolPathsToEditor();
+
+        // Listen for editor changes that affect CanAddTask
+        Editor.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(Editor.InputPath))
+            {
+                AddTaskCommand.NotifyCanExecuteChanged();
             }
 
-            StartEncodeCommand.NotifyCanExecuteChanged();
-            CancelEncodeCommand.NotifyCanExecuteChanged();
-            InstallOrUpdateNvencCommand.NotifyCanExecuteChanged();
+            if (args.PropertyName is not nameof(Editor.CommandPreview))
+            {
+                Editor.RefreshCommandPreview();
+            }
         };
+
+        // Listen for tool path changes and sync to editor
+        PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(NvencPath) or nameof(FfprobePath) or nameof(FfmpegPath))
+            {
+                SyncToolPathsToEditor();
+            }
+            else if (args.PropertyName is nameof(IsToolInstalling))
+            {
+                OnPropertyChanged(nameof(IsBusy));
+                AddTaskCommand.NotifyCanExecuteChanged();
+                CancelAllCommand.NotifyCanExecuteChanged();
+                InstallOrUpdateNvencCommand.NotifyCanExecuteChanged();
+            }
+            else if (args.PropertyName is nameof(NvencToolStatus))
+            {
+                // Handled in partial OnIsToolInstallingChanged/OnNvencToolStatusChanged
+            }
+
+            UpdateCommandPreview();
+        };
+
+        UpdateStatusTexts();
+        UseExistingManagedNvenc();
+    }
+
+    private void SyncToolPathsToEditor()
+    {
+        Editor.NvencPath = NvencPath;
+        Editor.FfprobePath = FfprobePath;
+        Editor.FfmpegPath = FfmpegPath;
     }
 
     internal void UpdateStatusTexts()
-
     {
-        StatusText = _localization["StatusReady"];
+        StatusText = string.Empty;
         NvencToolStatus = GetNvencToolStatusText();
+    }
+
+    partial void OnStatusTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasStatusText));
     }
 
     private string GetNvencToolStatusText()
@@ -211,112 +135,62 @@ public partial class MainWindowViewModel : ViewModelBase
         return _localization["NvencFound"] + existingNvenc;
     }
 
-
     public void SetInputPath(string path)
     {
-        InputPath = path;
+        SetInputPaths([path]);
+    }
+
+    public void SetInputPaths(IEnumerable<string> paths)
+    {
+        Editor.SetInputPaths(paths);
+        AddTaskCommand.NotifyCanExecuteChanged();
+        UpdateCommandPreview();
     }
 
     public void SetOutputDirectory(string path)
     {
-        OutputDirectory = path;
+        Editor.OutputDirectory = path;
+        UpdateCommandPreview();
     }
 
-    [RelayCommand(CanExecute = nameof(CanStartEncode))]
-    private async Task StartEncodeAsync()
+    private void UpdateCommandPreview()
     {
-        EncodeSettings? settings = null;
-        EncodePlan? plan = null;
-        _encodeCancellation = new CancellationTokenSource();
-        IsEncoding = true;
-        LogText = string.Empty;
-        StatusText = _localization["StatusEncoding"];
+        Editor.RefreshCommandPreview();
+    }
 
-        var progress = new Progress<string>(AppendProcessLine);
-
-        try
+    [RelayCommand(CanExecute = nameof(CanAddTask))]
+    private void AddTask()
+    {
+        if (!Editor.HasInputPaths)
         {
-            settings = CreateSettings();
-            AppendStatus(_localization["ParsingVideoInfo"]);
-            plan = await _commandBuilder.BuildAsync(settings, _encodeCancellation.Token);
-            LastOutputPath = plan.OutputPath;
-
-            foreach (var note in plan.Notes)
-            {
-                AppendStatus(note);
-            }
-
-            var outputDirectory = Path.GetDirectoryName(plan.OutputPath);
-            if (!string.IsNullOrEmpty(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            await EnsureNvencCapabilitiesAsync(settings, _encodeCancellation.Token);
-
-            if (plan.PreprocessCommand is not null)
-            {
-                AppendStatus(_localization["RunningFfmpegPreprocess"]);
-                AppendCommand(plan.PreprocessCommand);
-                var prepassExitCode = await _processRunner.RunAsync(plan.PreprocessCommand, progress, _encodeCancellation.Token);
-                if (prepassExitCode != 0)
-                {
-                    throw new InvalidOperationException($"{_localization["FfmpegPreprocessFailed"]}{prepassExitCode}。");
-                }
-            }
-
-            AppendStatus(_localization["RunningNvencEncode"]);
-            AppendCommand(plan.MainCommand);
-            var exitCode = await _processRunner.RunAsync(plan.MainCommand, progress, _encodeCancellation.Token);
-            if (exitCode != 0)
-            {
-                throw new InvalidOperationException($"{_localization["NvencEncodeFailed"]}{exitCode}。");
-            }
-
-            StatusText = _localization["StatusCompleted"];
-            AppendStatus(_localization["CompletedOutput"] + plan.OutputPath);
-        }
-        catch (OperationCanceledException)
-        {
-            StatusText = _localization["StatusCancelled"];
-            AppendStatus(_localization["TaskCancelled"]);
-        }
-        catch (Exception ex)
-        {
-            StatusText = _localization["StatusFailed"];
-            AppendStatus(ex.Message);
+            return;
         }
 
-        finally
+        foreach (var inputPath in Editor.InputPaths)
         {
-            TryDeleteTemporaryInput(plan, settings);
-            _encodeCancellation.Dispose();
-            _encodeCancellation = null;
-            IsEncoding = false;
+            var settings = Editor.CreateSnapshot(inputPath);
+            var name = System.IO.Path.GetFileNameWithoutExtension(settings.InputPath);
+            var task = new EncodeTask { Settings = settings, Name = name };
+            Queue.Enqueue(task);
         }
+
+        TaskAdded?.Invoke();
     }
 
-    private bool CanStartEncode()
+    private bool CanAddTask()
     {
-        return !IsEncoding && !IsToolInstalling && !string.IsNullOrWhiteSpace(InputPath);
+        return Editor.HasInputPaths && !IsToolInstalling;
     }
 
-    [RelayCommand(CanExecute = nameof(CanCancelEncode))]
-    private void CancelEncode()
+    [RelayCommand(CanExecute = nameof(CanCancelAll))]
+    private void CancelAll()
     {
-        _encodeCancellation?.Cancel();
+        Queue.CancelAllTasks();
     }
 
-    private bool CanCancelEncode()
+    private bool CanCancelAll()
     {
-        return IsEncoding;
-    }
-
-    [RelayCommand]
-    private void ClearLog()
-    {
-        LogText = string.Empty;
-        StatusText = _localization["StatusLogCleared"];
+        return IsQueueBusy;
     }
 
     [RelayCommand(CanExecute = nameof(CanInstallOrUpdateNvenc))]
@@ -324,23 +198,25 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         IsToolInstalling = true;
         StatusText = _localization["StatusInstallingNvenc"];
-        var progress = new Progress<string>(message => AppendStatus("[NVEnc] " + message));
+        var progress = new Progress<string>(message =>
+        {
+            // UI status display
+            StatusText = $"[NVEnc] {message}";
+        });
 
         try
         {
-            AppendStatus(_localization["NvencDownloadStart"]);
+            StatusText = _localization["NvencDownloadStart"];
             var result = await _nvencToolManager.InstallOrUpdateAsync(progress, CancellationToken.None);
             NvencPath = result.ExecutablePath;
             NvencToolStatus = $"NVEnc：{result.VersionTag} ({result.InstallDirectory})";
             StatusText = _localization["StatusNvencInstalled"];
-            AppendStatus(_localization["NvencPathUpdated"] + result.ExecutablePath);
         }
         catch (Exception ex)
         {
             StatusText = _localization["StatusNvencInstallFailed"];
-            AppendStatus(_localization["StatusNvencInstallFailed"] + "：" + ex.Message);
+            NvencToolStatus = _localization["StatusNvencInstallFailed"] + "：" + ex.Message;
         }
-
         finally
         {
             IsToolInstalling = false;
@@ -349,7 +225,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private bool CanInstallOrUpdateNvenc()
     {
-        return !IsEncoding && !IsToolInstalling;
+        return !IsQueueBusy && !IsToolInstalling;
     }
 
     private Views.SettingsWindow? _settingsWindow;
@@ -384,49 +260,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _aboutWindow.Show();
     }
 
-    private EncodeSettings CreateSettings()
-
-    {
-        return new EncodeSettings
-        {
-            NvencPath = NvencPath,
-            FfprobePath = FfprobePath,
-            FfmpegPath = FfmpegPath,
-            InputPath = InputPath,
-            OutputDirectory = OutputDirectory,
-            EnableVsr = EnableVsr,
-            AutoVsrResolution = AutoVsrResolution,
-            VsrLongEdge = VsrLongEdge,
-            VsrResolution = VsrResolution,
-            VsrQuality = VsrQuality,
-            EnableHdr = EnableHdr,
-            HdrContrast = HdrContrast,
-            HdrSaturation = HdrSaturation,
-            HdrMiddleGray = HdrMiddleGray,
-            HdrMaxLuminance = HdrMaxLuminance,
-            HdrMaxCll = HdrMaxCll,
-            HdrMasterDisplay = HdrMasterDisplay,
-            EnableFrameInterpolation = EnableFrameInterpolation,
-            TargetFps = TargetFps,
-            SkipFrucWhenSourceFpsIsHigh = SkipFrucWhenSourceFpsIsHigh,
-            FrucNormalizeMode = FrucNormalizeMode,
-            FrucNormalizeFps = FrucNormalizeFps,
-            FrucNormalizeCrf = FrucNormalizeCrf,
-            FrucNormalizePreset = FrucNormalizePreset,
-            KeepTemporaryFiles = KeepTemporaryFiles,
-            Deinterlace = Deinterlace,
-            VideoCodec = VideoCodec,
-            Qvbr = Qvbr,
-
-            NvencPreset = NvencPreset,
-            BFrames = BFrames,
-            TemporalAq = TemporalAq,
-            Avsync = Avsync
-        };
-    }
-
     internal void UseExistingManagedNvenc()
-
     {
         var existingNvenc = _nvencToolManager.FindExistingNvenc();
         if (existingNvenc is null)
@@ -437,89 +271,5 @@ public partial class MainWindowViewModel : ViewModelBase
 
         NvencPath = existingNvenc;
         NvencToolStatus = _localization["NvencFound"] + existingNvenc;
-    }
-
-    private async Task EnsureNvencCapabilitiesAsync(EncodeSettings settings, CancellationToken cancellationToken)
-    {
-        AppendStatus(_localization["CheckingNvencCapabilities"]);
-        var help = await _processRunner.CaptureAsync(
-            new ProcessCommand(settings.NvencPath, ["--help"]),
-            cancellationToken);
-        var helpText = help.CombinedOutput;
-
-        if (settings.EnableVsr && !helpText.Contains("ngx-vsr", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new InvalidOperationException(_localization["NvencNoVsr"]);
-        }
-
-        if (settings.EnableHdr && !helpText.Contains("--vpp-ngx-truehdr", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new InvalidOperationException(_localization["NvencNoHdr"]);
-        }
-
-        if (settings.EnableFrameInterpolation && !helpText.Contains("--vpp-fruc", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new InvalidOperationException(_localization["NvencNoFruc"]);
-        }
-
-        if (!settings.EnableFrameInterpolation)
-        {
-            return;
-        }
-
-        var features = await _processRunner.CaptureAsync(
-            new ProcessCommand(settings.NvencPath, ["--check-features"]),
-            cancellationToken);
-        if (features.ExitCode != 0)
-        {
-            AppendStatus(_localization["NvencCheckFeaturesFailed"]);
-            return;
-        }
-
-        var featureText = features.CombinedOutput;
-        if (!Regex.IsMatch(featureText, "nvof.*fruc.*yes", RegexOptions.IgnoreCase | RegexOptions.Singleline))
-        {
-            AppendStatus(_localization["NvencFrucNotConfirmed"]);
-        }
-    }
-
-
-    private void AppendCommand(ProcessCommand command)
-    {
-        AppendStatus(command.ToCommandLine());
-    }
-
-    private void AppendStatus(string message)
-    {
-        AppendProcessLine($"[{DateTime.Now:HH:mm:ss}] {message}");
-    }
-
-    private void AppendProcessLine(string line)
-    {
-        if (string.IsNullOrWhiteSpace(line))
-        {
-            return;
-        }
-
-        LogText += line + Environment.NewLine;
-    }
-
-    private static void TryDeleteTemporaryInput(EncodePlan? plan, EncodeSettings? settings)
-    {
-        if (plan?.TemporaryInputPath is null || settings?.KeepTemporaryFiles == true)
-        {
-            return;
-        }
-
-        try
-        {
-            if (File.Exists(plan.TemporaryInputPath))
-            {
-                File.Delete(plan.TemporaryInputPath);
-            }
-        }
-        catch
-        {
-        }
     }
 }

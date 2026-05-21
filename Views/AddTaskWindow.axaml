@@ -1,0 +1,275 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RTX_Encode_Toolkit.ViewModels"
+        xmlns:services="using:RTX_Encode_Toolkit.Services"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DesignWidth="980"
+        d:DesignHeight="720"
+        Width="980"
+        Height="720"
+        MinWidth="820"
+        MinHeight="560"
+        x:Class="RTX_Encode_Toolkit.Views.AddTaskWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/rtx-encode-toolkit.ico"
+        Title="{services:Localization Key=AddTask}"
+        Background="Transparent"
+        TransparencyLevelHint="Mica,Blur">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="Window">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="44,*,Auto" Margin="0">
+
+        <Border Classes="titleBar" Padding="16,0" Height="44">
+            <Grid ColumnDefinitions="Auto,*" VerticalAlignment="Center">
+                <TextBlock Text="{services:Localization Key=AddTask}"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*,360"
+              ColumnSpacing="14"
+              Margin="20,14,20,0">
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="12">
+
+                    <Border Classes="settingsCard">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="{services:Localization Key=FileSection}" Classes="sectionTitle"/>
+
+                            <Grid ColumnDefinitions="90,*,Auto" RowDefinitions="Auto,Auto" RowSpacing="10" ColumnSpacing="8">
+                                <TextBlock Text="{services:Localization Key=InputVideo}" Classes="label"/>
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding Editor.InputPath}"
+                                         PlaceholderText="{services:Localization Key=InputPlaceholder}"
+                                         AcceptsReturn="True"
+                                         TextWrapping="NoWrap"
+                                         MinHeight="32"
+                                         MaxHeight="90"/>
+                                <Button Grid.Column="2"
+                                        Content="{services:Localization Key=Browse}"
+                                        Click="BrowseInput_Click"
+                                        MinWidth="70"/>
+
+                                <TextBlock Grid.Row="1" Text="{services:Localization Key=OutputDirectory}" Classes="label"/>
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Text="{Binding Editor.OutputDirectory}"
+                                         PlaceholderText="{services:Localization Key=OutputPlaceholder}"/>
+                                <Button Grid.Row="1"
+                                        Grid.Column="2"
+                                        Content="{services:Localization Key=Browse}"
+                                        Click="BrowseOutput_Click"
+                                        MinWidth="70"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="settingsCard">
+                        <StackPanel Spacing="12">
+                            <CheckBox Content="{services:Localization Key=VsrSection}"
+                                      IsChecked="{Binding Editor.EnableVsr}"
+                                      FontWeight="SemiBold"
+                                      FontSize="14"/>
+
+                            <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
+                                <TextBlock Text="{services:Localization Key=AutoLongEdge}" Classes="label"/>
+                                <CheckBox Grid.Column="1" IsChecked="{Binding Editor.AutoVsrResolution}"/>
+
+                                <TextBlock Grid.Row="1" Text="{services:Localization Key=LongEdgePixels}" Classes="label"/>
+                                <NumericUpDown Grid.Row="1"
+                                               Grid.Column="1"
+                                               Minimum="2"
+                                               Maximum="8192"
+                                               Increment="2"
+                                               Value="{Binding Editor.VsrLongEdge}"/>
+
+                                <TextBlock Grid.Row="2" Text="{services:Localization Key=VsrQuality}" Classes="label"/>
+                                <NumericUpDown Grid.Row="2"
+                                               Grid.Column="1"
+                                               Minimum="1"
+                                               Maximum="4"
+                                               Increment="1"
+                                               Value="{Binding Editor.VsrQuality}"/>
+                            </Grid>
+
+                            <TextBox Text="{Binding Editor.VsrResolution}"
+                                     PlaceholderText="{services:Localization Key=FixedResolution}"
+                                     IsVisible="{Binding !Editor.AutoVsrResolution}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="settingsCard">
+                        <StackPanel Spacing="12">
+                            <CheckBox Content="{services:Localization Key=FrucSection}"
+                                      IsChecked="{Binding Editor.EnableFrameInterpolation}"
+                                      FontWeight="SemiBold"
+                                      FontSize="14"/>
+
+                            <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="10">
+                                <TextBlock Text="{services:Localization Key=TargetFps}" Classes="label"/>
+                                <NumericUpDown Grid.Column="1" Minimum="1" Maximum="240"
+                                               Increment="1" Value="{Binding Editor.TargetFps}"/>
+
+                                <TextBlock Grid.Row="1" Text="{services:Localization Key=SkipHighFps}" Classes="label"/>
+                                <CheckBox Grid.Row="1"
+                                          Grid.Column="1"
+                                          IsChecked="{Binding Editor.SkipFrucWhenSourceFpsIsHigh}"/>
+
+                                <TextBlock Grid.Row="2"
+                                           Grid.Column="1"
+                                           Text="{services:Localization Key=SkipHighFpsHelp}"
+                                           Classes="hint"
+                                           Margin="0,-6,0,0"/>
+
+                                <TextBlock Grid.Row="3" Text="{services:Localization Key=CfrPreprocess}" Classes="label"/>
+                                <ComboBox Grid.Row="3"
+                                          Grid.Column="1"
+                                          ItemsSource="{Binding Editor.NormalizeModes}"
+                                          SelectedItem="{Binding Editor.FrucNormalizeMode}"/>
+
+                                <TextBlock Grid.Row="4" Text="{services:Localization Key=CfrFps}" Classes="label"/>
+                                <NumericUpDown Grid.Row="4" Grid.Column="1" Minimum="0" Maximum="240"
+                                               Increment="0.001" Value="{Binding Editor.FrucNormalizeFps}"/>
+
+                                <TextBlock Grid.Row="5" Text="{services:Localization Key=PreprocessCrf}" Classes="label"/>
+                                <NumericUpDown Grid.Row="5" Grid.Column="1" Minimum="0" Maximum="51"
+                                               Increment="1" Value="{Binding Editor.FrucNormalizeCrf}"/>
+
+                                <TextBlock Grid.Row="6" Text="{services:Localization Key=PreprocessPreset}" Classes="label"/>
+                                <ComboBox Grid.Row="6"
+                                          Grid.Column="1"
+                                          ItemsSource="{Binding Editor.NormalizePresets}"
+                                          SelectedItem="{Binding Editor.FrucNormalizePreset}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="settingsCard">
+                        <StackPanel Spacing="12">
+                            <CheckBox Content="{services:Localization Key=HdrSection}"
+                                      IsChecked="{Binding Editor.EnableHdr}"
+                                      FontWeight="SemiBold"
+                                      FontSize="14"/>
+
+                            <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="10">
+                                <TextBlock Text="{services:Localization Key=Contrast}" Classes="label"/>
+                                <NumericUpDown Grid.Column="1" Minimum="0" Maximum="200"
+                                               Increment="1" Value="{Binding Editor.HdrContrast}"/>
+
+                                <TextBlock Grid.Row="1" Text="{services:Localization Key=Saturation}" Classes="label"/>
+                                <NumericUpDown Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="200"
+                                               Increment="1" Value="{Binding Editor.HdrSaturation}"/>
+
+                                <TextBlock Grid.Row="2" Text="{services:Localization Key=MiddleGray}" Classes="label"/>
+                                <NumericUpDown Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100"
+                                               Increment="1" Value="{Binding Editor.HdrMiddleGray}"/>
+
+                                <TextBlock Grid.Row="3" Text="{services:Localization Key=MaxLuminance}" Classes="label"/>
+                                <NumericUpDown Grid.Row="3" Grid.Column="1" Minimum="100" Maximum="4000"
+                                               Increment="50" Value="{Binding Editor.HdrMaxLuminance}"/>
+
+                                <TextBlock Grid.Row="4" Text="MaxCLL" Classes="label"/>
+                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Editor.HdrMaxCll}"/>
+
+                                <TextBlock Grid.Row="5" Text="MasterDisplay" Classes="label"/>
+                                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Editor.HdrMasterDisplay}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="settingsCard">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="{services:Localization Key=EncodeSection}" Classes="sectionTitle"/>
+
+                            <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="10">
+                                <TextBlock Text="{services:Localization Key=VideoCodec}" Classes="label"/>
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{Binding Editor.VideoCodecs}"
+                                          SelectedItem="{Binding Editor.VideoCodec}"/>
+
+                                <TextBlock Grid.Row="1" Text="QVBR" Classes="label"/>
+                                <NumericUpDown Grid.Row="1" Grid.Column="1" Minimum="1" Maximum="51"
+                                               Increment="1" Value="{Binding Editor.Qvbr}"/>
+
+                                <TextBlock Grid.Row="2" Text="{services:Localization Key=Preset}" Classes="label"/>
+                                <ComboBox Grid.Row="2"
+                                          Grid.Column="1"
+                                          ItemsSource="{Binding Editor.NvencPresets}"
+                                          SelectedItem="{Binding Editor.NvencPreset}"/>
+
+                                <TextBlock Grid.Row="3" Text="{services:Localization Key=BFrames}" Classes="label"/>
+                                <NumericUpDown Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="8"
+                                               Increment="1" Value="{Binding Editor.BFrames}"/>
+
+                                <TextBlock Grid.Row="4" Text="{services:Localization Key=TemporalAq}" Classes="label"/>
+                                <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding Editor.TemporalAq}"/>
+
+                                <TextBlock Grid.Row="5" Text="{services:Localization Key=Deinterlace}" Classes="label"/>
+                                <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding Editor.Deinterlace}"/>
+
+                                <TextBlock Grid.Row="6" Text="{services:Localization Key=Avsync}" Classes="label"/>
+                                <ComboBox Grid.Row="6"
+                                          Grid.Column="1"
+                                          ItemsSource="{Binding Editor.AvsyncModes}"
+                                          SelectedItem="{Binding Editor.Avsync}"/>
+                            </Grid>
+
+                            <Separator/>
+
+                            <CheckBox Content="{services:Localization Key=KeepTempFiles}"
+                                      IsChecked="{Binding Editor.KeepTemporaryFiles}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Border Grid.Column="1" Classes="settingsCard">
+                <Grid RowDefinitions="Auto,*" RowSpacing="8">
+                    <TextBlock Text="{services:Localization Key=CommandPreview}"
+                               Classes="sectionTitle"
+                               Margin="0"/>
+                    <TextBox Grid.Row="1"
+                             Classes="mono"
+                             Text="{Binding Editor.CommandPreview}"
+                             IsReadOnly="True"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalAlignment="Stretch"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2"
+                Padding="20,12"
+                BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="{services:Localization Key=Cancel}"
+                        Click="Cancel_Click"
+                        MinWidth="90"
+                        MinHeight="34"/>
+                <Button Content="{services:Localization Key=AddTask}"
+                        Command="{Binding AddTaskCommand}"
+                        Classes="accent"
+                        MinWidth="100"
+                        MinHeight="34"
+                        IsDefault="True"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
