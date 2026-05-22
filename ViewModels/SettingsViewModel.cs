@@ -1,9 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RTX_Encode_Toolkit.Services;
@@ -79,13 +75,13 @@ public partial class SettingsViewModel : ViewModelBase
 
         // Detect path sources and validate (manually set hints since constructor
         // sets backing fields directly, not triggering partial OnXxxChanged methods)
-        _nvencPathHint = GetPathHint(_nvencPath, "NVEncC64.exe");
+        _nvencPathHint = ToolPathResolver.GetPathHint(_nvencPath);
         _nvencPathValid = IsPathValid(_nvencPath);
         _nvencPathHintColor = _nvencPathValid ? "Gray" : "Red";
-        _ffprobePathHint = GetPathHint(_ffprobePath, "ffprobe.exe");
+        _ffprobePathHint = ToolPathResolver.GetPathHint(_ffprobePath);
         _ffprobePathValid = IsPathValid(_ffprobePath);
         _ffprobePathHintColor = _ffprobePathValid ? "Gray" : "Red";
-        _ffmpegPathHint = GetPathHint(_ffmpegPath, "ffmpeg.exe");
+        _ffmpegPathHint = ToolPathResolver.GetPathHint(_ffmpegPath);
         _ffmpegPathValid = IsPathValid(_ffmpegPath);
         _ffmpegPathHintColor = _ffmpegPathValid ? "Gray" : "Red";
 
@@ -103,90 +99,28 @@ public partial class SettingsViewModel : ViewModelBase
         }
     }
 
-
-    private static string GetPathHint(string path, string executableName)
-    {
-        // Check if it's a full path to an existing file
-        if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
-        {
-            return $"✓ {path}";
-        }
-
-        // Check if it's just a name (found via PATH environment variable)
-        if (!string.IsNullOrWhiteSpace(path) && !path.Contains(Path.DirectorySeparatorChar) && !path.Contains(Path.AltDirectorySeparatorChar))
-        {
-            // Try to find it in PATH
-            var paths = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator) ?? [];
-            foreach (var dir in paths)
-            {
-                try
-                {
-                    var fullPath = Path.Combine(dir.Trim(), executableName);
-                    if (File.Exists(fullPath))
-                    {
-                        return $"PATH: {fullPath}";
-                    }
-                }
-                catch
-                {
-                }
-            }
-            return "未找到";
-        }
-
-        // Check if it's a full path but file doesn't exist
-        if (!string.IsNullOrWhiteSpace(path))
-        {
-            return "文件不存在";
-        }
-
-        return "未设置";
-    }
-
     private static bool IsPathValid(string path)
     {
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            return false;
-        }
-
-        // If it's just a name (like "ffprobe.exe"), check if it exists in PATH
-        if (!path.Contains(Path.DirectorySeparatorChar) && !path.Contains(Path.AltDirectorySeparatorChar))
-        {
-            var paths = Environment.GetEnvironmentVariable("PATH")?.Split(Path.PathSeparator) ?? [];
-            return paths.Any(dir =>
-            {
-                try
-                {
-                    return File.Exists(Path.Combine(dir.Trim(), path));
-                }
-                catch
-                {
-                    return false;
-                }
-            });
-        }
-
-        return File.Exists(path);
+        return ToolPathResolver.IsPathValid(path);
     }
 
     partial void OnNvencPathChanged(string value)
     {
-        NvencPathHint = GetPathHint(value, "NVEncC64.exe");
+        NvencPathHint = ToolPathResolver.GetPathHint(value);
         NvencPathValid = IsPathValid(value);
         NvencPathHintColor = NvencPathValid ? "Gray" : "Red";
     }
 
     partial void OnFfprobePathChanged(string value)
     {
-        FfprobePathHint = GetPathHint(value, "ffprobe.exe");
+        FfprobePathHint = ToolPathResolver.GetPathHint(value);
         FfprobePathValid = IsPathValid(value);
         FfprobePathHintColor = FfprobePathValid ? "Gray" : "Red";
     }
 
     partial void OnFfmpegPathChanged(string value)
     {
-        FfmpegPathHint = GetPathHint(value, "ffmpeg.exe");
+        FfmpegPathHint = ToolPathResolver.GetPathHint(value);
         FfmpegPathValid = IsPathValid(value);
         FfmpegPathHintColor = FfmpegPathValid ? "Gray" : "Red";
     }

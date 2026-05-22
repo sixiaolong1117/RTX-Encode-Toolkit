@@ -102,6 +102,10 @@ public sealed class Localization : INotifyPropertyChanged
             ["NvencUsingPath"] = "NVEnc：使用 PATH 或手动路径",
             ["NvencNotFound"] = "NVEnc：未发现内置版本，可点击下载/更新",
             ["NvencFound"] = "NVEnc：已发现 ",
+            ["MissingToolsTitle"] = "工具未找到",
+            ["MissingToolsHeader"] = "未找到必要工具",
+            ["MissingToolsMessage"] = "启动时没有找到以下工具。请在设置中配置路径，或将它们加入系统 PATH 后再开始编码。",
+            ["MissingToolPathUnset"] = "未设置",
 
             // Log messages
             ["ParsingVideoInfo"] = "解析视频信息并生成命令...",
@@ -233,6 +237,10 @@ public sealed class Localization : INotifyPropertyChanged
             ["NvencUsingPath"] = "NVEnc: using PATH or manual path",
             ["NvencNotFound"] = "NVEnc: no built-in version found, click Download/Update",
             ["NvencFound"] = "NVEnc: found ",
+            ["MissingToolsTitle"] = "Tools Not Found",
+            ["MissingToolsHeader"] = "Required tools were not found",
+            ["MissingToolsMessage"] = "The following tools were not found at startup. Configure their paths in Settings or add them to system PATH before encoding.",
+            ["MissingToolPathUnset"] = "Not set",
 
             // Log messages
             ["ParsingVideoInfo"] = "Parsing video info and generating commands...",

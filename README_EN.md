@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="Assets/rtx-encode-toolkit.png" alt="RTX Encode Toolkit" width="256">
+<img src="Assets/rtx-encode-toolkit.png" alt="RTX Encode Toolkit" width="128">
 
 **An NVIDIA RTX video encoding tool based on [NVEnc](https://github.com/rigaya/NVEnc)<br/>Supporting RTX VSR Upscaling · RTX HDR · NVOF FRUC Frame Interpolation · Batch Task Queue**
 

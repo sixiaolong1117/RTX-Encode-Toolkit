@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="Assets/rtx-encode-toolkit.png" alt="RTX Encode Toolkit" width="256">
+<img src="Assets/rtx-encode-toolkit.png" alt="RTX Encode Toolkit" width="128">
 
 **基于 [NVEnc](https://github.com/rigaya/NVEnc) 的 NVIDIA RTX 视频编码工具<br/>支持 RTX VSR 超分 · RTX HDR · NVOF FRUC 插帧 · 批量任务队列**
 

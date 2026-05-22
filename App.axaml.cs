@@ -20,12 +20,19 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            var showMissingToolsWindowForTesting = desktop.Args?.Any(IsMissingToolsWindowTestArgument) == true;
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = new MainWindowViewModel(showMissingToolsWindowForTesting),
             };
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static bool IsMissingToolsWindowTestArgument(string argument)
+    {
+        // 测试工具缺失弹窗
+        return string.Equals(argument, "--test-missing-tools-window", System.StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -15,6 +15,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly Localization _localization = Localization.Instance;
     private readonly ProcessRunner _processRunner = new();
     private readonly NvencCommandBuilder _commandBuilder;
+    private readonly bool _showMissingToolsWindowForTesting;
 
     // Tool paths (shared across all tasks, synced with SettingsWindow)
     [ObservableProperty]
@@ -42,7 +43,14 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool HasStatusText => !string.IsNullOrWhiteSpace(StatusText);
 
     public MainWindowViewModel()
+        : this(false)
     {
+    }
+
+    public MainWindowViewModel(bool showMissingToolsWindowForTesting)
+    {
+        _showMissingToolsWindowForTesting = showMissingToolsWindowForTesting;
+
         var videoProbeService = new VideoProbeService(_processRunner);
         _commandBuilder = new NvencCommandBuilder(videoProbeService);
 
@@ -117,38 +125,43 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        // If it's a simple filename, check PATH
-        if (!path.Contains(System.IO.Path.DirectorySeparatorChar) && !path.Contains(System.IO.Path.AltDirectorySeparatorChar))
+        var result = ToolPathResolver.Resolve(path);
+        if (result.Status == ToolPathLookupStatus.FoundInPath)
         {
-            var envPaths = Environment.GetEnvironmentVariable("PATH")?.Split(System.IO.Path.PathSeparator) ?? [];
-            foreach (var dir in envPaths)
-            {
-                try
-                {
-                    if (System.IO.File.Exists(System.IO.Path.Combine(dir.Trim(), path)))
-                    {
-                        NvencToolStatus = _localization["NvencUsingPath"];
-                        return;
-                    }
-                }
-                catch
-                {
-                }
-            }
-
-            NvencToolStatus = _localization["NvencNotFound"];
+            NvencToolStatus = _localization["NvencUsingPath"];
             return;
         }
 
-        // It's a full path
-        if (System.IO.File.Exists(path))
+        if (result.Status == ToolPathLookupStatus.FoundAtPath)
         {
-            NvencToolStatus = _localization["NvencFound"] + path;
+            NvencToolStatus = _localization["NvencFound"] + result.ResolvedPath;
         }
         else
         {
             NvencToolStatus = _localization["NvencNotFound"];
         }
+    }
+
+    public IReadOnlyList<ToolPathInfo> GetMissingRequiredTools()
+    {
+        if (_showMissingToolsWindowForTesting)
+        {
+            return GetRequiredTools();
+        }
+
+        return GetRequiredTools()
+            .Where(tool => !ToolPathResolver.IsPathValid(tool.ConfiguredPath))
+            .ToList();
+    }
+
+    private IReadOnlyList<ToolPathInfo> GetRequiredTools()
+    {
+        return
+        [
+            new("NVEncC", NvencPath),
+            new("ffprobe", FfprobePath),
+            new("ffmpeg", FfmpegPath),
+        ];
     }
 
     public void SetInputPath(string path)
