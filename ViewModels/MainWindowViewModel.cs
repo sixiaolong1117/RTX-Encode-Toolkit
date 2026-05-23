@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RTX_Encode_Toolkit.Models;
@@ -220,37 +218,5 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool CanCancelAll()
     {
         return IsQueueBusy;
-    }
-
-    private Views.SettingsWindow? _settingsWindow;
-    private Views.AboutWindow? _aboutWindow;
-
-    [RelayCommand]
-    private void OpenSettings()
-    {
-        if (_settingsWindow is { IsVisible: true })
-        {
-            _settingsWindow.Activate();
-            return;
-        }
-
-        _settingsWindow = new Views.SettingsWindow
-        {
-            DataContext = new SettingsViewModel(this)
-        };
-        _settingsWindow.Show();
-    }
-
-    [RelayCommand]
-    private void OpenAbout()
-    {
-        if (_aboutWindow is { IsVisible: true })
-        {
-            _aboutWindow.Activate();
-            return;
-        }
-
-        _aboutWindow = new Views.AboutWindow();
-        _aboutWindow.Show();
     }
 }

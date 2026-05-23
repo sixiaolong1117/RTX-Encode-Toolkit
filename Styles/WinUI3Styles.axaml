@@ -3,8 +3,8 @@
 
     <Styles.Resources>
         <ResourceDictionary>
-            <!-- 全局默认字体（中文字体优先，Inter 作为英文字体回退） -->
-            <FontFamily x:Key="DefaultFont">Microsoft YaHei, Inter, sans-serif</FontFamily>
+            <!-- 全局默认字体（优先使用 Windows 11 / WinUI 风格字体，中文回退到微软雅黑 UI） -->
+            <FontFamily x:Key="DefaultFont">Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI, Microsoft YaHei, sans-serif</FontFamily>
 
             <!-- ===== 主题感知资源：深色/浅色自动适配 ===== -->
             <ResourceDictionary.ThemeDictionaries>

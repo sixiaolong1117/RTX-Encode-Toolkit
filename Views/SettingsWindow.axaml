@@ -13,6 +13,7 @@
         MinHeight="400"
         x:Class="RTX_Encode_Toolkit.Views.SettingsWindow"
         x:DataType="vm:SettingsViewModel"
+        WindowStartupLocation="CenterOwner"
         Title="{services:Localization Key=SettingsTitle}"
         Background="Transparent"
         TransparencyLevelHint="Mica,Blur">

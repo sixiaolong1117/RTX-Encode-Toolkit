@@ -62,9 +62,9 @@
                     <Button Content="{services:Localization Key=CancelAll}"
                             Command="{Binding CancelAllCommand}" />
                     <Button Content="{services:Localization Key=Settings}"
-                            Command="{Binding OpenSettingsCommand}" />
+                            Click="OpenSettings_Click" />
                     <Button Content="{services:Localization Key=About}"
-                            Command="{Binding OpenAboutCommand}" />
+                            Click="OpenAbout_Click" />
                 </StackPanel>
             </Grid>
         </Border>
