@@ -6,7 +6,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\rtx-encode-toolkit.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <Version>0.0.3.0</Version>
+    <Version>0.0.4.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
