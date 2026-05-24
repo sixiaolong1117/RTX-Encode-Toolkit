@@ -7,7 +7,7 @@
 **An NVIDIA RTX video encoding tool based on [NVEnc](https://github.com/rigaya/NVEnc)<br/>Supporting RTX VSR Upscaling · RTX HDR · NVOF FRUC Frame Interpolation · Batch Task Queue**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](RTX-Encode-Toolkit.csproj)
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
 [![Avalonia](https://img.shields.io/badge/Avalonia-12.0-8B5CFE)](https://avaloniaui.net/)
 
 **English** | [简体中文](README.md)
@@ -18,11 +18,7 @@
 
 ## 📖 Introduction
 
-RTX Encode Toolkit is a Windows desktop application based on [NVEnc](https://github.com/rigaya/NVEnc), providing a graphical interface for NVIDIA RTX GPU users to easily leverage AI-powered video enhancement features:
-
-- **RTX VSR (Video Super Resolution)** — AI video super resolution, upscaling low-resolution videos to higher resolutions
-- **RTX HDR (NGX TrueHDR)** — AI-powered SDR to HDR video conversion
-- **NVOF FRUC (Frame Interpolation)** — AI optical flow-based frame interpolation for higher frame rates
+RTX Encode Toolkit is a Windows desktop application based on [NVEnc](https://github.com/rigaya/NVEnc), providing a graphical interface for NVIDIA RTX GPU users to easily leverage the AI-powered video enhancement capabilities of RTX graphics cards.
 
 ## 🖼️ Screenshots
 
@@ -30,33 +26,12 @@ RTX Encode Toolkit is a Windows desktop application based on [NVEnc](https://git
 
 ## ✨ Features
 
-### Video Enhancement
-
-- 🎯 **RTX VSR Upscaling** — Supports auto long-edge and fixed resolution modes, quality levels 1–4
-- 🌈 **RTX HDR** — SDR → HDR conversion with contrast, saturation, middle gray, max luminance, MaxCLL, and MasterDisplay parameters
-- ⚡ **NVOF FRUC Frame Interpolation** — Configurable target FPS, auto-skip for high FPS sources, smart VFR → CFR preprocessing
-
-### Encoding & Parameters
-
-- 🎞️ **Three Codecs** — HEVC (h265) 10bit / AV1 10bit / H264 8bit
-- ⚙️ **Fine-Grained Encoding Control** — QVBR, Preset (P1–P7), B Frames (0–8), Temporal AQ, Deinterlace, Audio Sync mode
-- 🔄 **CFR Preprocessing** — Auto / Force / Off modes, configurable CRF and Preset (ultrafast–medium)
-
-### Task Management
-
-- 📋 **Batch Input** — Select multiple video files at once and add them to the task queue with one click
-- 📊 **Task Queue Panel** — All task statuses, progress, and parameter labels at a glance
-- ⏹️ **Individual Cancel/Remove** — Cancel or remove individual tasks in the queue without affecting others
-- 📂 **Quick Open Output Directory** — Open the output folder with one click after encoding completes
-- 📝 **Per-Task Logging** — Independent log view for each task, with auto-scroll support
-
-### Tools & UI
-
-- 🔧 **Tool Path Management** — NVEncC / ffprobe / ffmpeg path configuration, auto-detection from system PATH
-- 📥 **One-Click Download** — Built-in download links for NVEncC and FFmpeg
-- 📋 **Command Preview** — Real-time display of NVEncC command and ffmpeg CFR preprocessing command
-- 🌐 **Internationalization** — Simplified Chinese / English interface
-- 🪟 **WinUI 3 Style** — Mica material background, modern Windows 11 visual experience
+- **RTX VSR (Video Super Resolution)** — AI video super resolution, upscaling low-resolution videos to higher resolutions
+- **RTX HDR (NGX TrueHDR)** — AI-powered SDR to HDR video conversion
+- **NVOF FRUC (Frame Interpolation)** — AI optical flow-based frame interpolation for higher frame rates
+- **Batch Input** — Select multiple video files at once and add them to the task queue with one click
+- **Task Queue Panel** — All task statuses, progress, and parameter labels at a glance
+- **Per-Task Logging** — Independent log view for each task
 
 ## 🚀 Quick Start
 
@@ -69,18 +44,13 @@ RTX Encode Toolkit is a Windows desktop application based on [NVEnc](https://git
 
 ### Installation
 
-1. Download the latest release from the [Releases](https://github.com/sixiaolong1117/RTX-Encode-Toolkit/releases) page
-2. Extract to any directory
-3. Run `RTX-Encode-Toolkit.exe`
+Download the latest `.zip` archive from [GitHub Releases](https://github.com/sixiaolong1117/RTX-Encode-Toolkit/releases). Extract it to any directory and run `RTX-Encode-Toolkit.exe`.
 
 ### First Time Use
 
-1. Open the application and click the **Settings** button in the title bar
-2. In the settings page, click the **Download/Update** button next to NVEncC to open the NVEncC release page
-3. Download `NVEncC_x64.7z` and extract it to the `tools/nvenc/` folder in the application directory
-4. Similarly, download FFmpeg (must include ffmpeg.exe and ffprobe.exe) and place them in the `tools/ffmpeg/` folder
-5. Return to the main window, click **Add Task**, select input videos, adjust parameters, and click Add
-6. Tasks will be added to the queue and encoding will start automatically
+1. After launching the application, click the **Settings** button in the title bar and configure the paths to the required tools
+2. Return to the main window, click **Add Task**, select input videos, adjust parameters, and click Add
+3. Tasks will be added to the queue and encoding will start automatically
 
 > **Tip**: If NVEncC / ffprobe / ffmpeg are already in your system PATH, the application will detect and use them automatically.
 
@@ -159,15 +129,6 @@ RTX Encode Toolkit is a Windows desktop application based on [NVEnc](https://git
 | HEVC (h265) | 10bit | Default recommendation, good compatibility, excellent quality |
 | AV1 | 10bit | Latest encoding standard, highest compression ratio; requires RTX 40 series+ |
 | H264 | 8bit | Best compatibility, suitable for playback on older devices |
-
-## 🏗️ Tech Architecture
-
-- **UI Framework**: [Avalonia UI 12.0](https://avaloniaui.net/) — Cross-platform .NET UI framework
-- **MVVM Toolkit**: [CommunityToolkit.Mvvm 8.4](https://github.com/CommunityToolkit/dotnet) — Community MVVM toolkit
-- **Encoding Core**: [NVEnc](https://github.com/rigaya/NVEnc) — NVIDIA GPU encoder developed by rigaya
-- **Media Analysis**: [FFmpeg / ffprobe](https://ffmpeg.org/) — Video information probing and preprocessing
-- **Target Framework**: .NET 10.0 (Windows)
-- **Project Version**: 0.0.2.0
 
 ## 🤝 Contributing
 
