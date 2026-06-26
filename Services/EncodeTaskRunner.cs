@@ -83,6 +83,21 @@ public sealed class EncodeTaskRunner
                     $"{_localization["NvencEncodeFailed"]}{exitCode}。");
             }
 
+            if (plan.PostprocessCommand is not null)
+            {
+                AppendLog(task, _localization["RunningFfmpegExtract"], progress);
+                AppendCommand(task, plan.PostprocessCommand, progress);
+                var extractExitCode = await _processRunner.RunAsync(
+                    plan.PostprocessCommand,
+                    new Progress<string>(line => AppendProcessLine(task, line, progress)),
+                    cancellationToken);
+                if (extractExitCode != 0)
+                {
+                    throw new InvalidOperationException(
+                        $"{_localization["FfmpegExtractFailed"]}{extractExitCode}。");
+                }
+            }
+
             task.Status = EncodeTaskStatus.Completed;
             task.FinishedAt = DateTime.Now;
             task.ProgressPercent = 100;
@@ -257,16 +272,27 @@ public sealed class EncodeTaskRunner
 
     private static void TryDeleteTemporaryInput(EncodePlan? plan, EncodeSettings settings)
     {
-        if (plan?.TemporaryInputPath is null || settings.KeepTemporaryFiles)
+        if (settings.KeepTemporaryFiles)
+        {
+            return;
+        }
+
+        TryDeleteFile(plan?.TemporaryInputPath);
+        TryDeleteFile(plan?.TemporaryOutputPath);
+    }
+
+    private static void TryDeleteFile(string? path)
+    {
+        if (path is null)
         {
             return;
         }
 
         try
         {
-            if (File.Exists(plan.TemporaryInputPath))
+            if (File.Exists(path))
             {
-                File.Delete(plan.TemporaryInputPath);
+                File.Delete(path);
             }
         }
         catch

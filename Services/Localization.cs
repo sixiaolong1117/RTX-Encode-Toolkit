@@ -123,12 +123,19 @@ public sealed class Localization : INotifyPropertyChanged
             ["NvencFrucNotConfirmed"] = "未确认 NVOF FRUC=yes；如果 GPU 或驱动不支持，编码阶段会失败。",
 
             // File picker
-            ["SelectInputVideo"] = "选择输入视频",
-            ["VideoFiles"] = "视频文件",
+            ["SelectInputVideo"] = "选择输入文件",
+            ["VideoFiles"] = "媒体文件",
             ["SelectOutputDir"] = "选择输出目录",
 
             // Command preview notes
             ["FfmpegCfrPrepass"] = "ffmpeg CFR prepass: Auto/Force 模式下可能先运行",
+
+            // Image processing
+            ["RunningFfmpegExtract"] = "提取输出图片...",
+            ["FfmpegExtractFailed"] = "ffmpeg 图片提取失败，退出码 ",
+            ["FrucSkippedForImage"] = "图片输入，FRUC 已在设置中忽略。",
+            ["ImageInputSkippedFruc"] = "图片输入，跳过 FRUC 插帧。",
+            ["ImageInputCaption"] = "图片输入，输出格式为 PNG。",
 
             // Language
             ["Language"] = "语言",
@@ -258,12 +265,19 @@ public sealed class Localization : INotifyPropertyChanged
             ["NvencFrucNotConfirmed"] = "NVOF FRUC=yes not confirmed; encoding may fail if GPU or driver does not support it.",
 
             // File picker
-            ["SelectInputVideo"] = "Select Input Video",
-            ["VideoFiles"] = "Video Files",
+            ["SelectInputVideo"] = "Select Input File",
+            ["VideoFiles"] = "Media Files",
             ["SelectOutputDir"] = "Select Output Directory",
 
             // Command preview notes
             ["FfmpegCfrPrepass"] = "ffmpeg CFR prepass: may run first in Auto/Force mode",
+
+            // Image processing
+            ["RunningFfmpegExtract"] = "Extracting output image...",
+            ["FfmpegExtractFailed"] = "ffmpeg image extraction failed, exit code ",
+            ["FrucSkippedForImage"] = "Image input, FRUC will be ignored by settings.",
+            ["ImageInputSkippedFruc"] = "Image input, skipping FRUC.",
+            ["ImageInputCaption"] = "Image input, output format is PNG.",
 
             // Language
             ["Language"] = "Language",

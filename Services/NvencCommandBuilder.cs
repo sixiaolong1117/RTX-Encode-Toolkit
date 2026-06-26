@@ -12,6 +12,14 @@ namespace RTX_Encode_Toolkit.Services;
 public sealed class NvencCommandBuilder
 {
     private readonly VideoProbeService _videoProbeService;
+    private readonly Localization _localization = Localization.Instance;
+
+    private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif", ".webp"
+    };
+
+    private static bool IsImageFile(string path) => ImageExtensions.Contains(Path.GetExtension(path));
 
     public NvencCommandBuilder(VideoProbeService videoProbeService)
     {
@@ -26,8 +34,9 @@ public sealed class NvencCommandBuilder
         var outputDirectory = ResolveOutputDirectory(settings, inputPath);
         var notes = new List<string>();
         VideoInfo? videoInfo = null;
+        var isImage = IsImageFile(inputPath);
 
-        if (settings.EnableVsr || settings.EnableFrameInterpolation)
+        if (settings.EnableVsr || (settings.EnableFrameInterpolation && !isImage))
         {
             videoInfo = await _videoProbeService.ProbeAsync(settings.FfprobePath, inputPath, cancellationToken);
         }
@@ -35,14 +44,21 @@ public sealed class NvencCommandBuilder
         var resolvedVsrResolution = settings.EnableVsr
             ? ResolveVsrResolution(settings, videoInfo)
             : null;
-        var outputPath = ResolveOutputPath(settings, inputPath, outputDirectory, resolvedVsrResolution);
+        var outputPath = ResolveOutputPath(settings, inputPath, outputDirectory, resolvedVsrResolution, isImage);
 
         var encodeInput = inputPath;
         ProcessCommand? preprocessCommand = null;
+        ProcessCommand? postprocessCommand = null;
         string? temporaryInputPath = null;
+        string? temporaryOutputPath = null;
 
-        var shouldRunFruc = settings.EnableFrameInterpolation;
-        if (settings.EnableFrameInterpolation && videoInfo is not null)
+        var shouldRunFruc = settings.EnableFrameInterpolation && !isImage;
+        if (settings.EnableFrameInterpolation && isImage)
+        {
+            notes.Add(_localization["ImageInputSkippedFruc"]);
+        }
+
+        if (shouldRunFruc && videoInfo is not null)
         {
             if (settings.SkipFrucWhenSourceFpsIsHigh && videoInfo.AverageFrameRate >= settings.TargetFps)
             {
@@ -78,14 +94,23 @@ public sealed class NvencCommandBuilder
             }
         }
 
-        var mainCommand = BuildNvencCommand(settings, encodeInput, outputPath, resolvedVsrResolution, shouldRunFruc);
+        if (isImage)
+        {
+            temporaryOutputPath = Path.Combine(outputDirectory, $"{Guid.NewGuid():N}.mkv");
+            postprocessCommand = BuildImageExtractCommand(settings, temporaryOutputPath, outputPath);
+            notes.Add(_localization["ImageInputCaption"]);
+        }
+
+        var mainCommand = BuildNvencCommand(settings, encodeInput, isImage ? temporaryOutputPath! : outputPath, resolvedVsrResolution, shouldRunFruc, isImage);
 
         return new EncodePlan
         {
             MainCommand = mainCommand,
             PreprocessCommand = preprocessCommand,
+            PostprocessCommand = postprocessCommand,
             OutputPath = outputPath,
             TemporaryInputPath = temporaryInputPath,
+            TemporaryOutputPath = isImage ? temporaryOutputPath : null,
             ResolvedVsrResolution = resolvedVsrResolution,
             Notes = notes
         };
@@ -98,19 +123,21 @@ public sealed class NvencCommandBuilder
         var vsrResolution = settings.EnableVsr
             ? settings.AutoVsrResolution ? $"auto:{settings.VsrLongEdge}x-2/-2x{settings.VsrLongEdge}" : settings.VsrResolution.Trim()
             : null;
-        return BuildNvencCommand(settings, inputPath, outputPath, vsrResolution, settings.EnableFrameInterpolation);
+        var isImage = !string.IsNullOrWhiteSpace(settings.InputPath) && IsImageFile(settings.InputPath.Trim('"'));
+        var includeFruc = settings.EnableFrameInterpolation && !isImage;
+        return BuildNvencCommand(settings, inputPath, outputPath, vsrResolution, includeFruc, isImage);
     }
 
     private static void ValidateSettings(EncodeSettings settings)
     {
         if (string.IsNullOrWhiteSpace(settings.InputPath))
         {
-            throw new InvalidOperationException("请选择输入视频。");
+            throw new InvalidOperationException("请选择输入文件。");
         }
 
         if (!File.Exists(settings.InputPath.Trim('"')))
         {
-            throw new FileNotFoundException("输入视频不存在。", settings.InputPath);
+            throw new FileNotFoundException("输入文件不存在。", settings.InputPath);
         }
 
         if (!settings.EnableVsr && !settings.EnableHdr && !settings.EnableFrameInterpolation)
@@ -168,7 +195,7 @@ public sealed class NvencCommandBuilder
         return Path.Combine(inputDirectory, "rtx_exports");
     }
 
-    private static string ResolveOutputPath(EncodeSettings settings, string inputPath, string outputDirectory, string? resolvedVsrResolution)
+    private static string ResolveOutputPath(EncodeSettings settings, string inputPath, string outputDirectory, string? resolvedVsrResolution, bool isImage)
     {
         var baseName = Path.GetFileNameWithoutExtension(inputPath);
         var tags = new List<string> { baseName };
@@ -184,25 +211,28 @@ public sealed class NvencCommandBuilder
             tags.Add("hdr");
         }
 
-        if (settings.EnableFrameInterpolation)
+        if (settings.EnableFrameInterpolation && !isImage)
         {
             tags.Add($"fruc{settings.TargetFps}");
         }
 
-        var codecTag = settings.VideoCodec switch
+        if (!isImage)
         {
-            "AV1" => "av1",
-            "H264" => "h264",
-            _ => "hevc10"
-        };
-        tags.Add(codecTag);
-        if (settings.EnableHdr)
-        {
-            tags.Add("hdr10");
+            var codecTag = settings.VideoCodec switch
+            {
+                "AV1" => "av1",
+                "H264" => "h264",
+                _ => "hevc10"
+            };
+            tags.Add(codecTag);
+            if (settings.EnableHdr)
+            {
+                tags.Add("hdr10");
+            }
         }
 
-
-        return Path.Combine(outputDirectory, string.Join("_", tags) + ".mkv");
+        var ext = isImage ? ".png" : ".mkv";
+        return Path.Combine(outputDirectory, string.Join("_", tags) + ext);
     }
 
     private static string ResolvePreviewOutputPath(EncodeSettings settings, string inputPath)
@@ -217,6 +247,23 @@ public sealed class NvencCommandBuilder
             : settings.OutputDirectory.Trim('"');
         var baseName = Path.GetFileNameWithoutExtension(inputPath);
         return Path.Combine(outputDirectory, baseName + "_rtx_export.mkv");
+    }
+
+    private static ProcessCommand BuildImageExtractCommand(EncodeSettings settings, string tempMkvPath, string outputPath)
+    {
+        return new ProcessCommand(
+            settings.FfmpegPath,
+            new[]
+            {
+                "-hide_banner",
+                "-v", "warning",
+                "-stats",
+                "-y",
+                "-i", tempMkvPath,
+                "-vframes", "1",
+                "-c:v", "png",
+                outputPath
+            });
     }
 
     private static string ResolveVsrResolution(EncodeSettings settings, VideoInfo? videoInfo)
@@ -306,7 +353,8 @@ public sealed class NvencCommandBuilder
         string inputPath,
         string outputPath,
         string? vsrResolution,
-        bool includeFruc)
+        bool includeFruc,
+        bool isImage = false)
     {
         var (codec, profile, outputDepth) = settings.VideoCodec switch
         {
@@ -317,7 +365,7 @@ public sealed class NvencCommandBuilder
 
         var args = new List<string>
         {
-            "--avhw",
+            isImage ? "--avsw" : "--avhw",
             "-i",
             inputPath,
             "-o",
@@ -405,9 +453,10 @@ public sealed class NvencCommandBuilder
             args.Add("auto");
         }
 
-        args.AddRange(
-            new[]
-            {
+        if (!isImage)
+        {
+            args.AddRange(
+            [
                 "--audio-copy",
                 "--sub-copy",
                 "--chapter-copy",
@@ -418,12 +467,14 @@ public sealed class NvencCommandBuilder
                 "--video-metadata",
                 "copy",
                 "--avsync",
-                settings.Avsync,
-                "--output-format",
-                "matroska",
-                "--log-level",
-                "info"
-            });
+                settings.Avsync
+            ]);
+        }
+
+        args.Add("--output-format");
+        args.Add("matroska");
+        args.Add("--log-level");
+        args.Add("info");
 
         return new ProcessCommand(settings.NvencPath, args);
     }

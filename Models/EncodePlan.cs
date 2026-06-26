@@ -8,9 +8,13 @@ public sealed class EncodePlan
 
     public ProcessCommand? PreprocessCommand { get; init; }
 
+    public ProcessCommand? PostprocessCommand { get; init; }
+
     public required string OutputPath { get; init; }
 
     public string? TemporaryInputPath { get; init; }
+
+    public string? TemporaryOutputPath { get; init; }
 
     public string? ResolvedVsrResolution { get; init; }
 
@@ -18,11 +22,17 @@ public sealed class EncodePlan
 
     public string ToCommandPreview()
     {
-        if (PreprocessCommand is null)
+        var result = MainCommand.ToCommandLine();
+        if (PostprocessCommand is not null)
         {
-            return MainCommand.ToCommandLine();
+            result += "\n\n" + PostprocessCommand.ToCommandLine();
         }
 
-        return PreprocessCommand.ToCommandLine() + "\n\n" + MainCommand.ToCommandLine();
+        if (PreprocessCommand is not null)
+        {
+            result = PreprocessCommand.ToCommandLine() + "\n\n" + result;
+        }
+
+        return result;
     }
 }

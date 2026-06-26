@@ -66,7 +66,7 @@ public partial class AddTaskWindow : Window
                 [
                     new FilePickerFileType(_localization["VideoFiles"])
                     {
-                        Patterns = ["*.mp4", "*.mkv", "*.mov", "*.avi", "*.webm", "*.m2ts", "*.ts"]
+                        Patterns = ["*.mp4", "*.mkv", "*.mov", "*.avi", "*.webm", "*.m2ts", "*.ts", "*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tiff", "*.tif", "*.webp"]
                     },
                     FilePickerFileTypes.All
                 ]
