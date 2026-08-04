@@ -105,9 +105,7 @@ public sealed class EncodeTaskRunner
             AppendLog(task, _localization["CompletedOutput"] + plan.OutputPath, progress);
             Report(progress, new EncodeTaskProgress(
                 task.Id,
-                Status: EncodeTaskStatus.Completed,
-                ProgressText: task.ProgressText,
-                ProgressPercent: task.ProgressPercent));
+                Status: EncodeTaskStatus.Completed));
         }
         catch (OperationCanceledException)
         {
@@ -117,8 +115,7 @@ public sealed class EncodeTaskRunner
             AppendLog(task, _localization["TaskCancelled"], progress);
             Report(progress, new EncodeTaskProgress(
                 task.Id,
-                Status: EncodeTaskStatus.Cancelled,
-                ProgressText: task.ProgressText));
+                Status: EncodeTaskStatus.Cancelled));
         }
         catch (Exception ex)
         {
@@ -130,7 +127,6 @@ public sealed class EncodeTaskRunner
             Report(progress, new EncodeTaskProgress(
                 task.Id,
                 Status: EncodeTaskStatus.Failed,
-                ProgressText: task.ProgressText,
                 ErrorMessage: ex.Message));
             throw;
         }
@@ -219,11 +215,10 @@ public sealed class EncodeTaskRunner
 
         if (TryUpdateProgress(task, trimmedLine))
         {
+            // 进度字段已直接写入模型并经 INPC 通知，快照只需同步日志
             Report(progress, new EncodeTaskProgress(
                 task.Id,
-                LogText: task.LogText,
-                ProgressText: task.ProgressText,
-                ProgressPercent: task.ProgressPercent));
+                LogText: task.LogText));
             return;
         }
 

@@ -16,141 +16,31 @@ public partial class EncodeTaskViewModel : ViewModelBase
 
     public EncodeTaskViewModel(
         EncodeTask task,
-        Action<string>? cancelTask = null,
-        Action<string>? removeTask = null)
+        Action<string> cancelTask,
+        Action<string> removeTask)
     {
         _task = task;
-        _cancelTask = cancelTask ?? (_ => { });
-        _removeTask = removeTask ?? (_ => { });
+        _cancelTask = cancelTask;
+        _removeTask = removeTask;
         Id = task.Id;
-        Name = task.Name;
         Settings = task.Settings;
-        Status = task.Status;
-        StartedAt = task.StartedAt;
-        FinishedAt = task.FinishedAt;
-        OutputPath = task.OutputPath;
-        ErrorMessage = task.ErrorMessage;
-        LogText = task.LogText;
-        ProgressText = task.ProgressText;
-        ProgressPercent = task.ProgressPercent;
+        _task.PropertyChanged += (_, e) => OnTaskPropertyChanged(e.PropertyName);
     }
 
-    public EncodeTask Task => _task;
     public EncodeSettings Settings { get; }
 
     public string Id { get; }
 
-    public string Name
-    {
-        get => _task.Name;
-        set
-        {
-            if (_task.Name != value)
-            {
-                _task.Name = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    public EncodeTaskStatus Status
-    {
-        get => _task.Status;
-        set
-        {
-            if (_task.Status != value)
-            {
-                _task.Status = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(StatusText));
-                OnPropertyChanged(nameof(CanCancel));
-                OnPropertyChanged(nameof(CanRemove));
-                OnPropertyChanged(nameof(CanOpenFolder));
-                OnPropertyChanged(nameof(IsActive));
-                OnPropertyChanged(nameof(IsProgressIndeterminate));
-                CancelCommand.NotifyCanExecuteChanged();
-                RemoveCommand.NotifyCanExecuteChanged();
-                OpenOutputCommand.NotifyCanExecuteChanged();
-            }
-        }
-    }
-
-    public DateTime? StartedAt
-    {
-        get => _task.StartedAt;
-        set
-        {
-            _task.StartedAt = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public DateTime? FinishedAt
-    {
-        get => _task.FinishedAt;
-        set
-        {
-            _task.FinishedAt = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(DurationText));
-        }
-    }
-
-    public string? OutputPath
-    {
-        get => _task.OutputPath;
-        set
-        {
-            _task.OutputPath = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(CanOpenFolder));
-            OpenOutputCommand.NotifyCanExecuteChanged();
-        }
-    }
-
-    public string? ErrorMessage
-    {
-        get => _task.ErrorMessage;
-        set
-        {
-            _task.ErrorMessage = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string LogText
-    {
-        get => _task.LogText;
-        set
-        {
-            _task.LogText = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string ProgressText
-    {
-        get => _task.ProgressText;
-        set
-        {
-            _task.ProgressText = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(HasProgressText));
-        }
-    }
-
-    public double? ProgressPercent
-    {
-        get => _task.ProgressPercent;
-        set
-        {
-            _task.ProgressPercent = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(ProgressPercentValue));
-            OnPropertyChanged(nameof(HasProgressPercent));
-            OnPropertyChanged(nameof(IsProgressIndeterminate));
-        }
-    }
+    // 只读委托，模型 SetProperty 触发 INPC 后经 OnTaskPropertyChanged 转发
+    public string Name => _task.Name;
+    public EncodeTaskStatus Status => _task.Status;
+    public DateTime? StartedAt => _task.StartedAt;
+    public DateTime? FinishedAt => _task.FinishedAt;
+    public string? OutputPath => _task.OutputPath;
+    public string? ErrorMessage => _task.ErrorMessage;
+    public string LogText => _task.LogText;
+    public string ProgressText => _task.ProgressText;
+    public double? ProgressPercent => _task.ProgressPercent;
 
     // Computed properties for display
     public string StatusText => Status switch
@@ -256,6 +146,15 @@ public partial class EncodeTaskViewModel : ViewModelBase
         }
     }
 
+    // ponytail: 模型任意属性变化时通知全部属性+命令状态，省去依赖追踪
+    private void OnTaskPropertyChanged(string? propertyName)
+    {
+        OnPropertyChanged(string.Empty);
+        CancelCommand.NotifyCanExecuteChanged();
+        RemoveCommand.NotifyCanExecuteChanged();
+        OpenOutputCommand.NotifyCanExecuteChanged();
+    }
+
     private ExplorerTarget? GetExplorerTarget()
     {
         if (!string.IsNullOrWhiteSpace(OutputPath))
@@ -293,18 +192,6 @@ public partial class EncodeTaskViewModel : ViewModelBase
         }
 
         return null;
-    }
-
-    public void NotifyPropertyChanged(string propertyName)
-    {
-        OnPropertyChanged(propertyName);
-    }
-
-    public void NotifyCommandStateChanged()
-    {
-        CancelCommand.NotifyCanExecuteChanged();
-        RemoveCommand.NotifyCanExecuteChanged();
-        OpenOutputCommand.NotifyCanExecuteChanged();
     }
 
     private sealed record ExplorerTarget(string Path, bool SelectFile);

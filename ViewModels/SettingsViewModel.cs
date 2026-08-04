@@ -75,16 +75,9 @@ public partial class SettingsViewModel : ViewModelBase
 
         // Detect path sources and validate (manually set hints since constructor
         // sets backing fields directly, not triggering partial OnXxxChanged methods)
-        _nvencPathHint = ToolPathResolver.GetPathHint(_nvencPath);
-        _nvencPathValid = IsPathValid(_nvencPath);
-        _nvencPathHintColor = _nvencPathValid ? "Gray" : "Red";
-        _ffprobePathHint = ToolPathResolver.GetPathHint(_ffprobePath);
-        _ffprobePathValid = IsPathValid(_ffprobePath);
-        _ffprobePathHintColor = _ffprobePathValid ? "Gray" : "Red";
-        _ffmpegPathHint = ToolPathResolver.GetPathHint(_ffmpegPath);
-        _ffmpegPathValid = IsPathValid(_ffmpegPath);
-        _ffmpegPathHintColor = _ffmpegPathValid ? "Gray" : "Red";
-
+        (_nvencPathHint, _nvencPathValid, _nvencPathHintColor) = GetPathState(_nvencPath);
+        (_ffprobePathHint, _ffprobePathValid, _ffprobePathHintColor) = GetPathState(_ffprobePath);
+        (_ffmpegPathHint, _ffmpegPathValid, _ffmpegPathHintColor) = GetPathState(_ffmpegPath);
 
         // Set selected language
         var currentCulture = _localization.CurrentCulture;
@@ -99,30 +92,26 @@ public partial class SettingsViewModel : ViewModelBase
         }
     }
 
-    private static bool IsPathValid(string path)
-    {
-        return ToolPathResolver.IsPathValid(path);
-    }
-
     partial void OnNvencPathChanged(string value)
     {
-        NvencPathHint = ToolPathResolver.GetPathHint(value);
-        NvencPathValid = IsPathValid(value);
-        NvencPathHintColor = NvencPathValid ? "Gray" : "Red";
+        (NvencPathHint, NvencPathValid, NvencPathHintColor) = GetPathState(value);
     }
 
     partial void OnFfprobePathChanged(string value)
     {
-        FfprobePathHint = ToolPathResolver.GetPathHint(value);
-        FfprobePathValid = IsPathValid(value);
-        FfprobePathHintColor = FfprobePathValid ? "Gray" : "Red";
+        (FfprobePathHint, FfprobePathValid, FfprobePathHintColor) = GetPathState(value);
     }
 
     partial void OnFfmpegPathChanged(string value)
     {
-        FfmpegPathHint = ToolPathResolver.GetPathHint(value);
-        FfmpegPathValid = IsPathValid(value);
-        FfmpegPathHintColor = FfmpegPathValid ? "Gray" : "Red";
+        (FfmpegPathHint, FfmpegPathValid, FfmpegPathHintColor) = GetPathState(value);
+    }
+
+    private static (string Hint, bool Valid, string Color) GetPathState(string value)
+    {
+        var hint = ToolPathResolver.GetPathHint(value);
+        var valid = ToolPathResolver.IsPathValid(value);
+        return (hint, valid, valid ? "Gray" : "Red");
     }
 
 

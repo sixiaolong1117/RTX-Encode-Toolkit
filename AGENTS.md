@@ -42,7 +42,7 @@ Assets/        - 图标和资源
 - **ViewLocator**: 反射将 `ViewModels.XxxViewModel` → `Views.XxxView`，命名必须严格对应
 - **编译绑定**: `AvaloniaUseCompiledBindingsByDefault=true`，AXAML 绑定必须类型安全（`ObservableProperty` 生成的 public 属性）
 - **本地化**: 硬编码在 `Localization.cs`，添加新字符串需同时更新 zh-CN 和 en-US
-- **任务队列**: 默认单任务串行 (ParallelCount=1)
+- **任务队列**: 单任务串行
 - **没有测试项目**: 代码库无测试，修改后通过 `dotnet build` 验证
 
 ## 图片与视频处理差异

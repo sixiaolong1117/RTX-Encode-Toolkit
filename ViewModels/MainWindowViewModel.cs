@@ -13,7 +13,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly Localization _localization = Localization.Instance;
     private readonly ProcessRunner _processRunner = new();
     private readonly NvencCommandBuilder _commandBuilder;
-    private readonly bool _showMissingToolsWindowForTesting;
 
     // Tool paths (shared across all tasks, synced with SettingsWindow)
     [ObservableProperty]
@@ -41,14 +40,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool HasStatusText => !string.IsNullOrWhiteSpace(StatusText);
 
     public MainWindowViewModel()
-        : this(false)
     {
-    }
-
-    public MainWindowViewModel(bool showMissingToolsWindowForTesting)
-    {
-        _showMissingToolsWindowForTesting = showMissingToolsWindowForTesting;
-
         var videoProbeService = new VideoProbeService(_processRunner);
         _commandBuilder = new NvencCommandBuilder(videoProbeService);
 
@@ -142,11 +134,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public IReadOnlyList<ToolPathInfo> GetMissingRequiredTools()
     {
-        if (_showMissingToolsWindowForTesting)
-        {
-            return GetRequiredTools();
-        }
-
         return GetRequiredTools()
             .Where(tool => !ToolPathResolver.IsPathValid(tool.ConfiguredPath))
             .ToList();
@@ -160,11 +147,6 @@ public partial class MainWindowViewModel : ViewModelBase
             new("ffprobe", FfprobePath),
             new("ffmpeg", FfmpegPath),
         ];
-    }
-
-    public void SetInputPath(string path)
-    {
-        SetInputPaths([path]);
     }
 
     public void SetInputPaths(IEnumerable<string> paths)

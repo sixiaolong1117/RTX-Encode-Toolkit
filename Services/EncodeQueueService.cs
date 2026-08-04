@@ -19,7 +19,6 @@ public sealed class EncodeQueueService
     private bool _isProcessing;
 
     private int _nextSortOrder;
-    private int _parallelCount = 1;
 
     public EncodeQueueService(EncodeTaskRunner runner)
     {
@@ -36,23 +35,6 @@ public sealed class EncodeQueueService
         lock (_lock)
         {
             return Tasks.OrderBy(task => task.SortOrder).ToList();
-        }
-    }
-
-    /// <summary>
-    /// Maximum number of tasks to encode concurrently. Default is 1.
-    /// </summary>
-    public int ParallelCount
-    {
-        get => _parallelCount;
-        set
-        {
-            if (value < 1)
-            {
-                value = 1;
-            }
-
-            _parallelCount = value;
         }
     }
 
@@ -310,16 +292,8 @@ public sealed class EncodeQueueService
             {
                 task.LogText = progress.LogText;
             }
-
-            if (progress.ProgressText is not null)
-            {
-                task.ProgressText = progress.ProgressText;
-            }
-
-            if (progress.ProgressPercent.HasValue)
-            {
-                task.ProgressPercent = progress.ProgressPercent;
-            }
+            // ProgressText/ProgressPercent 由 AppendProcessLine 直接写模型并经 INPC 通知，
+            // 快照覆盖会造成异步投递下的瞬态回退，故跳过。
         }
 
         TasksChanged?.Invoke();

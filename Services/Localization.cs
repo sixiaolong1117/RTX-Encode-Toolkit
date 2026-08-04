@@ -133,7 +133,6 @@ public sealed class Localization : INotifyPropertyChanged
             // Image processing
             ["RunningFfmpegExtract"] = "提取输出图片...",
             ["FfmpegExtractFailed"] = "ffmpeg 图片提取失败，退出码 ",
-            ["FrucSkippedForImage"] = "图片输入，FRUC 已在设置中忽略。",
             ["ImageInputSkippedFruc"] = "图片输入，跳过 FRUC 插帧。",
             ["ImageInputCaption"] = "图片输入，输出格式为 PNG。",
 
@@ -275,7 +274,6 @@ public sealed class Localization : INotifyPropertyChanged
             // Image processing
             ["RunningFfmpegExtract"] = "Extracting output image...",
             ["FfmpegExtractFailed"] = "ffmpeg image extraction failed, exit code ",
-            ["FrucSkippedForImage"] = "Image input, FRUC will be ignored by settings.",
             ["ImageInputSkippedFruc"] = "Image input, skipping FRUC.",
             ["ImageInputCaption"] = "Image input, output format is PNG.",
 

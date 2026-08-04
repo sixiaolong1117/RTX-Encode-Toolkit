@@ -136,8 +136,6 @@ public partial class EncodeSettingsEditorViewModel : ViewModelBase
 
     public IReadOnlyList<string> InputPaths => _inputPaths;
     public bool HasInputPaths => _inputPaths.Count > 0;
-    public bool HasMultipleInputPaths => _inputPaths.Count > 1;
-    public int InputCount => _inputPaths.Count;
 
     public string CommandPreview
     {
@@ -256,8 +254,6 @@ public partial class EncodeSettingsEditorViewModel : ViewModelBase
 
         OnPropertyChanged(nameof(InputPaths));
         OnPropertyChanged(nameof(HasInputPaths));
-        OnPropertyChanged(nameof(HasMultipleInputPaths));
-        OnPropertyChanged(nameof(InputCount));
     }
 
     private static IEnumerable<string> ParseInputPaths(string value)
