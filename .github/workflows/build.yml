@@ -71,6 +71,11 @@ jobs:
           (Get-Content "$env:PROJECT_PATH") -replace '<Version>[^<]*</Version>', "<Version>$version</Version>" | Set-Content "$env:PROJECT_PATH" -Encoding UTF8
           Write-Host "Applied version $version for current build"
 
+      # 下载内置第三方工具（NVEncC + ffmpeg）到 tools/，publish 时自动打包进产物
+      - name: Download bundled tools
+        shell: pwsh
+        run: ./scripts/Download-Tools.ps1
+
       - name: Restore
         run: dotnet restore $env:PROJECT_PATH
 

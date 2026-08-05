@@ -12,40 +12,10 @@ public partial class MainWindow : Window
     private AddTaskWindow? _addTaskWindow;
     private SettingsWindow? _settingsWindow;
     private AboutWindow? _aboutWindow;
-    private bool _missingToolsWarningShown;
 
     public MainWindow()
     {
         InitializeComponent();
-    }
-
-    protected override void OnOpened(EventArgs e)
-    {
-        base.OnOpened(e);
-        Dispatcher.UIThread.Post(ShowMissingToolsWarningIfNeeded, DispatcherPriority.Background);
-    }
-
-    private async void ShowMissingToolsWarningIfNeeded()
-    {
-        if (_missingToolsWarningShown || DataContext is not MainWindowViewModel viewModel)
-        {
-            return;
-        }
-
-        _missingToolsWarningShown = true;
-        var missingTools = viewModel.GetMissingRequiredTools();
-        if (missingTools.Count == 0)
-        {
-            return;
-        }
-
-        var dialog = new MissingToolsWindow(missingTools);
-
-        await dialog.ShowDialog(this);
-        if (dialog.OpenSettingsRequested)
-        {
-            await ShowSettingsDialogAsync(viewModel);
-        }
     }
 
     private async void OpenAddTask_Click(object? sender, RoutedEventArgs e)

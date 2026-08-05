@@ -22,62 +22,9 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private LanguageOption _selectedLanguage;
 
-    [ObservableProperty]
-    private string _nvencPath;
-
-    [ObservableProperty]
-    private string _ffprobePath;
-
-    [ObservableProperty]
-    private string _ffmpegPath;
-
-
-
-    // Path source hints
-    [ObservableProperty]
-    private string _nvencPathHint = string.Empty;
-
-    [ObservableProperty]
-    private string _ffprobePathHint = string.Empty;
-
-    [ObservableProperty]
-    private string _ffmpegPathHint = string.Empty;
-
-    // Path validity
-    [ObservableProperty]
-    private bool _nvencPathValid = true;
-
-    [ObservableProperty]
-    private bool _ffprobePathValid = true;
-
-    [ObservableProperty]
-    private bool _ffmpegPathValid = true;
-
-    // Path hint foreground color (Red if invalid)
-    [ObservableProperty]
-    private string _nvencPathHintColor = "Gray";
-
-    [ObservableProperty]
-    private string _ffprobePathHintColor = "Gray";
-
-    [ObservableProperty]
-    private string _ffmpegPathHintColor = "Gray";
-
-
     public SettingsViewModel(MainWindowViewModel mainViewModel)
     {
         _mainViewModel = mainViewModel;
-
-        // Initialize from main view model
-        _nvencPath = mainViewModel.NvencPath;
-        _ffprobePath = mainViewModel.FfprobePath;
-        _ffmpegPath = mainViewModel.FfmpegPath;
-
-        // Detect path sources and validate (manually set hints since constructor
-        // sets backing fields directly, not triggering partial OnXxxChanged methods)
-        (_nvencPathHint, _nvencPathValid, _nvencPathHintColor) = GetPathState(_nvencPath);
-        (_ffprobePathHint, _ffprobePathValid, _ffprobePathHintColor) = GetPathState(_ffprobePath);
-        (_ffmpegPathHint, _ffmpegPathValid, _ffmpegPathHintColor) = GetPathState(_ffmpegPath);
 
         // Set selected language
         var currentCulture = _localization.CurrentCulture;
@@ -92,30 +39,6 @@ public partial class SettingsViewModel : ViewModelBase
         }
     }
 
-    partial void OnNvencPathChanged(string value)
-    {
-        (NvencPathHint, NvencPathValid, NvencPathHintColor) = GetPathState(value);
-    }
-
-    partial void OnFfprobePathChanged(string value)
-    {
-        (FfprobePathHint, FfprobePathValid, FfprobePathHintColor) = GetPathState(value);
-    }
-
-    partial void OnFfmpegPathChanged(string value)
-    {
-        (FfmpegPathHint, FfmpegPathValid, FfmpegPathHintColor) = GetPathState(value);
-    }
-
-    private static (string Hint, bool Valid, string Color) GetPathState(string value)
-    {
-        var hint = ToolPathResolver.GetPathHint(value);
-        var valid = ToolPathResolver.IsPathValid(value);
-        return (hint, valid, valid ? "Gray" : "Red");
-    }
-
-
-
     /// <summary>
     /// Raised when the window should close after saving.
     /// </summary>
@@ -123,11 +46,6 @@ public partial class SettingsViewModel : ViewModelBase
 
     private void ApplySettings()
     {
-        // Apply tool paths
-        _mainViewModel.NvencPath = NvencPath;
-        _mainViewModel.FfprobePath = FfprobePath;
-        _mainViewModel.FfmpegPath = FfmpegPath;
-
         // Apply language
         var langValue = SelectedLanguage.Value;
         if (langValue == "System")

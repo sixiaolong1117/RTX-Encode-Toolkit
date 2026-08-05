@@ -14,9 +14,18 @@
 ## 构建命令
 
 ```bash
+# 首次构建前先下载内置第三方工具（NVEncC + ffmpeg）到 tools/，CI 会自动执行
+./scripts/Download-Tools.ps1
 dotnet build RTX-Encode-Toolkit.csproj
 dotnet publish RTX-Encode-Toolkit.csproj --configuration Release --runtime win-x64 --self-contained false
 ```
+
+## 内置第三方工具
+
+- `scripts/Download-Tools.ps1` 下载固定版本（NVEncC 9.30 x64 / ffmpeg n7.1 GPL）并 sha256 校验，平铺 3 个 exe 到 `tools/`（不入 git）
+- `tools/*` 由 csproj `CopyToOutputDirectory` 复制到发布产物 `{output}/tools/`；`CheckBundledTools` target 在编译期检查 3 个 exe 存在，缺失即中止
+- 工具路径已锁定为内置 `AppContext.BaseDirectory/tools/`，不回退系统 PATH，用户不可配置（`EncodeSettings` 默认值即裸文件名）
+- 升级版本：修改脚本顶部 `$NVEncTag` / `$FFmpegAsset` 常量（NVEncC 的 sha256 一并更新，ffmpeg 自动从 checksums.sha256 校验）
 
 ## 目录结构
 

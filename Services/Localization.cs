@@ -47,9 +47,6 @@ public sealed class Localization : INotifyPropertyChanged
             ["OutputDirectory"] = "输出目录",
             ["OutputPlaceholder"] = "留空则输出到 rtx_exports",
 
-            // Tool paths
-            ["DownloadUpdate"] = "下载/更新",
-
             // VSR section
             ["VsrSection"] = "RTX VSR 超分",
             ["AutoLongEdge"] = "自动长边",
@@ -99,13 +96,11 @@ public sealed class Localization : INotifyPropertyChanged
             ["FollowLog"] = "跟随最新日志",
 
             // NVEnc status
-            ["NvencUsingPath"] = "NVEnc：使用 PATH 或手动路径",
             ["NvencNotFound"] = "NVEnc：未发现内置版本，可点击下载/更新",
             ["NvencFound"] = "NVEnc：已发现 ",
             ["MissingToolsTitle"] = "工具未找到",
             ["MissingToolsHeader"] = "未找到必要工具",
             ["MissingToolsMessage"] = "启动时没有找到以下工具。请在设置中配置路径，或将它们加入系统 PATH 后再开始编码。",
-            ["MissingToolPathUnset"] = "未设置",
 
             // Log messages
             ["ParsingVideoInfo"] = "解析视频信息并生成命令...",
@@ -147,10 +142,6 @@ public sealed class Localization : INotifyPropertyChanged
             ["About"] = "关于",
             ["AboutTitle"] = "关于",
             ["SettingsTitle"] = "设置",
-            ["ToolPaths"] = "工具路径",
-            ["NvencPath"] = "NVEncC 路径",
-            ["FfprobePath"] = "ffprobe 路径",
-            ["FfmpegPath"] = "ffmpeg 路径",
             ["LanguageSettings"] = "语言设置",
             ["Apply"] = "应用",
             ["Save"] = "保存",
@@ -187,9 +178,6 @@ public sealed class Localization : INotifyPropertyChanged
             ["InputPlaceholder"] = "input.mp4",
             ["OutputDirectory"] = "Output Directory",
             ["OutputPlaceholder"] = "Leave empty to output to rtx_exports",
-
-            // Tool paths
-            ["DownloadUpdate"] = "Download/Update",
 
             // VSR section
             ["VsrSection"] = "RTX VSR Upscaling",
@@ -240,13 +228,11 @@ public sealed class Localization : INotifyPropertyChanged
             ["FollowLog"] = "Follow Log",
 
             // NVEnc status
-            ["NvencUsingPath"] = "NVEnc: using PATH or manual path",
             ["NvencNotFound"] = "NVEnc: no built-in version found, click Download/Update",
             ["NvencFound"] = "NVEnc: found ",
             ["MissingToolsTitle"] = "Tools Not Found",
             ["MissingToolsHeader"] = "Required tools were not found",
             ["MissingToolsMessage"] = "The following tools were not found at startup. Configure their paths in Settings or add them to system PATH before encoding.",
-            ["MissingToolPathUnset"] = "Not set",
 
             // Log messages
             ["ParsingVideoInfo"] = "Parsing video info and generating commands...",
@@ -288,10 +274,6 @@ public sealed class Localization : INotifyPropertyChanged
             ["About"] = "About",
             ["AboutTitle"] = "About",
             ["SettingsTitle"] = "Settings",
-            ["ToolPaths"] = "Tool Paths",
-            ["NvencPath"] = "NVEncC Path",
-            ["FfprobePath"] = "ffprobe Path",
-            ["FfmpegPath"] = "ffmpeg Path",
             ["LanguageSettings"] = "Language Settings",
             ["Apply"] = "Apply",
             ["Save"] = "Save",

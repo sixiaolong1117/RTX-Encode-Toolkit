@@ -49,11 +49,19 @@ RTX Encode Toolkit 是一款基于 [NVEnc](https://github.com/rigaya/NVEnc) 的 
 
 ### 首次使用
 
-1. 打开软件后，点击标题栏的 **设置** 按钮，填写所需工具的路径
+1. 解压后直接运行 `RTX-Encode-Toolkit.exe` 即可——发布包已内置 NVEncC 与 ffmpeg/ffprobe，无需额外配置
 2. 返回主界面，点击 **添加任务**，选择输入视频，调整参数，点击添加
 3. 任务将加入队列并自动开始编码
 
-> **提示**：如果 NVEncC / ffprobe / ffmpeg 已存在于系统 PATH 中，软件会自动检测并使用。
+> **提示**：内置工具优先级最高（随包 `tools/` 目录），其次为系统 PATH 中的 NVEncC / ffprobe / ffmpeg。如需自定义工具路径，可在 **设置** 中手动指定。
+
+### 从源码构建（可选）
+
+发布包已内置第三方工具，无需手动准备。本地开发如需重新生成 `tools/`：
+
+```powershell
+./scripts/Download-Tools.ps1   # 下载 NVEncC 9.30 + ffmpeg (GPL) 到 tools/，构建时自动打包
+```
 
 ## 📖 使用指南
 

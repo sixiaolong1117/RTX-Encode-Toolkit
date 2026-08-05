@@ -48,61 +48,6 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="20,14,20,0">
             <StackPanel Spacing="16">
 
-                <!-- ===== 工具路径区域 ===== -->
-                <Border Classes="settingsCard">
-                    <StackPanel Spacing="18">
-                        <TextBlock Text="{services:Localization Key=ToolPaths}" Classes="sectionTitle"/>
-
-                        <!-- NVEncC -->
-                        <StackPanel Spacing="4">
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
-                                <TextBlock Text="NVEncC" Classes="label" MinWidth="60"/>
-                                <TextBox Grid.Column="1" Text="{Binding NvencPath}" PlaceholderText="NVEncC64.exe"/>
-                                <Button Grid.Column="2" Content="{services:Localization Key=Browse}"
-                                        Click="BrowseNvenc_Click" MinWidth="60" FontSize="12" Margin="4,0,0,0"/>
-                                <Button Grid.Column="3" Content="{services:Localization Key=DownloadUpdate}"
-                                        Click="OpenNvencRelease_Click" MinWidth="80" FontSize="12"/>
-                            </Grid>
-                            <TextBlock Text="{Binding NvencPathHint}"
-                                       Classes="hint"
-                                       Foreground="{Binding NvencPathHintColor}"
-                                       Margin="68,0,0,0"/>
-                        </StackPanel>
-
-                        <!-- ffprobe -->
-                        <StackPanel Spacing="4">
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
-                                <TextBlock Text="ffprobe" Classes="label" MinWidth="60"/>
-                                <TextBox Grid.Column="1" Text="{Binding FfprobePath}" PlaceholderText="ffprobe.exe"/>
-                                <Button Grid.Column="2" Content="{services:Localization Key=Browse}"
-                                        Click="BrowseFfprobe_Click" MinWidth="60" FontSize="12" Margin="4,0,0,0"/>
-                                <Button Grid.Column="3" Content="{services:Localization Key=DownloadUpdate}"
-                                        Click="OpenFfmpegRelease_Click" MinWidth="80" FontSize="12"/>
-                            </Grid>
-                            <TextBlock Text="{Binding FfprobePathHint}"
-                                       Classes="hint"
-                                       Foreground="{Binding FfprobePathHintColor}"
-                                       Margin="68,0,0,0"/>
-                        </StackPanel>
-
-                        <!-- ffmpeg -->
-                        <StackPanel Spacing="4">
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
-                                <TextBlock Text="ffmpeg" Classes="label" MinWidth="60"/>
-                                <TextBox Grid.Column="1" Text="{Binding FfmpegPath}" PlaceholderText="ffmpeg.exe"/>
-                                <Button Grid.Column="2" Content="{services:Localization Key=Browse}"
-                                        Click="BrowseFfmpeg_Click" MinWidth="60" FontSize="12" Margin="4,0,0,0"/>
-                                <Button Grid.Column="3" Content="{services:Localization Key=DownloadUpdate}"
-                                        Click="OpenFfmpegRelease_Click" MinWidth="80" FontSize="12"/>
-                            </Grid>
-                            <TextBlock Text="{Binding FfmpegPathHint}"
-                                       Classes="hint"
-                                       Foreground="{Binding FfmpegPathHintColor}"
-                                       Margin="68,0,0,0"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
                 <!-- ===== 语言设置区域 ===== -->
                 <Border Classes="settingsCard">
                     <StackPanel Spacing="14">

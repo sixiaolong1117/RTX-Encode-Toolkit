@@ -12,6 +12,8 @@
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
+    <!-- 内置第三方工具（scripts/Download-Tools.ps1 生成，目录不存在时 glob 为空不报错） -->
+    <None Include="tools\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,4 +27,14 @@
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.1" />
   </ItemGroup>
+
+  <!-- 编译期硬检查：内置第三方工具必须存在（应用只使用随包二进制，缺失则中止编译） -->
+  <Target Name="CheckBundledTools" BeforeTargets="BeforeBuild">
+    <Error Condition="!Exists('tools\NVEncC64.exe')"
+           Text="缺少内置工具 tools\NVEncC64.exe。请先运行 ./scripts/Download-Tools.ps1" />
+    <Error Condition="!Exists('tools\ffmpeg.exe')"
+           Text="缺少内置工具 tools\ffmpeg.exe。请先运行 ./scripts/Download-Tools.ps1" />
+    <Error Condition="!Exists('tools\ffprobe.exe')"
+           Text="缺少内置工具 tools\ffprobe.exe。请先运行 ./scripts/Download-Tools.ps1" />
+  </Target>
 </Project>

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RTX_Encode_Toolkit.Models;
@@ -13,16 +12,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly Localization _localization = Localization.Instance;
     private readonly ProcessRunner _processRunner = new();
     private readonly NvencCommandBuilder _commandBuilder;
-
-    // Tool paths (shared across all tasks, synced with SettingsWindow)
-    [ObservableProperty]
-    private string _nvencPath = "NVEncC64.exe";
-
-    [ObservableProperty]
-    private string _ffprobePath = "ffprobe.exe";
-
-    [ObservableProperty]
-    private string _ffmpegPath = "ffmpeg.exe";
 
     [ObservableProperty]
     private string _statusText = string.Empty;
@@ -57,8 +46,6 @@ public partial class MainWindowViewModel : ViewModelBase
             }
         };
 
-        SyncToolPathsToEditor();
-
         // Listen for editor changes that affect CanAddTask
         Editor.PropertyChanged += (_, args) =>
         {
@@ -73,25 +60,7 @@ public partial class MainWindowViewModel : ViewModelBase
             }
         };
 
-        // Listen for tool path changes and sync to editor
-        PropertyChanged += (_, args) =>
-        {
-            if (args.PropertyName is nameof(NvencPath) or nameof(FfprobePath) or nameof(FfmpegPath))
-            {
-                SyncToolPathsToEditor();
-            }
-
-            UpdateCommandPreview();
-        };
-
         UpdateNvencStatus();
-    }
-
-    private void SyncToolPathsToEditor()
-    {
-        Editor.NvencPath = NvencPath;
-        Editor.FfprobePath = FfprobePath;
-        Editor.FfmpegPath = FfmpegPath;
     }
 
     internal void UpdateStatusTexts()
@@ -107,46 +76,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void UpdateNvencStatus()
     {
-        // Check if NVEncC64.exe is available via PATH or configured path
-        var path = NvencPath;
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            NvencToolStatus = _localization["NvencUsingPath"];
-            return;
-        }
-
-        var result = ToolPathResolver.Resolve(path);
-        if (result.Status == ToolPathLookupStatus.FoundInPath)
-        {
-            NvencToolStatus = _localization["NvencUsingPath"];
-            return;
-        }
-
-        if (result.Status == ToolPathLookupStatus.FoundAtPath)
-        {
-            NvencToolStatus = _localization["NvencFound"] + result.ResolvedPath;
-        }
-        else
-        {
-            NvencToolStatus = _localization["NvencNotFound"];
-        }
-    }
-
-    public IReadOnlyList<ToolPathInfo> GetMissingRequiredTools()
-    {
-        return GetRequiredTools()
-            .Where(tool => !ToolPathResolver.IsPathValid(tool.ConfiguredPath))
-            .ToList();
-    }
-
-    private IReadOnlyList<ToolPathInfo> GetRequiredTools()
-    {
-        return
-        [
-            new("NVEncC", NvencPath),
-            new("ffprobe", FfprobePath),
-            new("ffmpeg", FfmpegPath),
-        ];
+        // 只使用内置工具（AppContext.BaseDirectory/tools/）
+        var bundledPath = System.IO.Path.Combine(AppContext.BaseDirectory, "tools", "NVEncC64.exe");
+        NvencToolStatus = System.IO.File.Exists(bundledPath)
+            ? _localization["NvencFound"] + bundledPath
+            : _localization["NvencNotFound"];
     }
 
     public void SetInputPaths(IEnumerable<string> paths)
